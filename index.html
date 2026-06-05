@@ -1593,147 +1593,74 @@ function showPrCard(){
 // 3. Apps Script Wikipedia proxy (server-side, no CORS)
 // 4. Styled placeholder
 
-const CAMPUS_PHOTOS={
-  "University of Toronto":"https://upload.wikimedia.org/wikipedia/commons/thumb/6/6e/University_of_Toronto_Convocation_Hall.jpg/640px-University_of_Toronto_Convocation_Hall.jpg",
-  "McGill University":"https://upload.wikimedia.org/wikipedia/commons/thumb/a/a9/McGill_University_AM.jpg/640px-McGill_University_AM.jpg",
-  "University of British Columbia":"https://upload.wikimedia.org/wikipedia/commons/thumb/4/4f/UBC_Aerial.jpg/640px-UBC_Aerial.jpg",
-  "University of Alberta":"https://upload.wikimedia.org/wikipedia/commons/thumb/c/c5/University_of_Alberta_-_HUB_Mall.jpg/640px-University_of_Alberta_-_HUB_Mall.jpg",
-  "University of Calgary":"https://upload.wikimedia.org/wikipedia/commons/thumb/f/f9/University_of_Calgary_2010.jpg/640px-University_of_Calgary_2010.jpg",
-  "University of Waterloo":"https://upload.wikimedia.org/wikipedia/commons/thumb/5/5f/University_of_Waterloo_Dana_Porter_Library.jpg/640px-University_of_Waterloo_Dana_Porter_Library.jpg",
-  "Wilfrid Laurier University":"https://upload.wikimedia.org/wikipedia/commons/thumb/c/c5/Wilfrid_Laurier_University_Peters_Building.jpg/640px-Wilfrid_Laurier_University_Peters_Building.jpg",
-  "University of Guelph":"https://upload.wikimedia.org/wikipedia/commons/thumb/c/c7/University_of_Guelph_Johnston_Hall.jpg/640px-University_of_Guelph_Johnston_Hall.jpg",
-  "York University":"https://upload.wikimedia.org/wikipedia/commons/thumb/b/b1/York_University_-_Keele_Campus.jpg/640px-York_University_-_Keele_Campus.jpg",
-  "McMaster University":"https://upload.wikimedia.org/wikipedia/commons/thumb/8/88/McMasterU.jpg/640px-McMasterU.jpg",
-  "Brock University":"https://upload.wikimedia.org/wikipedia/commons/thumb/f/f5/Brock_University_-_Schmon_Tower.jpg/640px-Brock_University_-_Schmon_Tower.jpg",
-  "Queen's University":"https://upload.wikimedia.org/wikipedia/commons/thumb/3/31/Queens_University_Grant_Hall.jpg/640px-Queens_University_Grant_Hall.jpg",
-  "Carleton University":"https://upload.wikimedia.org/wikipedia/commons/thumb/9/97/Carleton_University_Ottawa.jpg/640px-Carleton_University_Ottawa.jpg",
-  "University of Ottawa":"https://upload.wikimedia.org/wikipedia/commons/thumb/0/04/University_of_Ottawa_Tabaret_Hall.jpg/640px-University_of_Ottawa_Tabaret_Hall.jpg",
-  "University of Western Ontario":"https://upload.wikimedia.org/wikipedia/commons/thumb/3/3e/UWO-UniversityCollege.jpg/640px-UWO-UniversityCollege.jpg",
-  "University of Windsor":"https://upload.wikimedia.org/wikipedia/commons/thumb/6/68/University_of_Windsor.jpg/640px-University_of_Windsor.jpg",
-  "Simon Fraser University":"https://upload.wikimedia.org/wikipedia/commons/thumb/5/5b/Simon_Fraser_University_aerial.jpg/640px-Simon_Fraser_University_aerial.jpg",
-  "University of Victoria":"https://upload.wikimedia.org/wikipedia/commons/thumb/2/2b/University_of_Victoria_Quad.jpg/640px-University_of_Victoria_Quad.jpg",
-  "Dalhousie University":"https://upload.wikimedia.org/wikipedia/commons/thumb/9/9e/Dalhousie_University_Arts_Building.jpg/640px-Dalhousie_University_Arts_Building.jpg",
-  "University of Manitoba":"https://upload.wikimedia.org/wikipedia/commons/thumb/b/b3/University_of_Manitoba_Administration_Building.jpg/640px-University_of_Manitoba_Administration_Building.jpg",
-  "University of Saskatchewan":"https://upload.wikimedia.org/wikipedia/commons/thumb/d/de/University_of_Saskatchewan_Administration_Building.jpg/640px-University_of_Saskatchewan_Administration_Building.jpg",
-  "University of Regina":"https://upload.wikimedia.org/wikipedia/commons/thumb/b/b2/University_of_Regina.jpg/640px-University_of_Regina.jpg",
-  "Memorial University":"https://upload.wikimedia.org/wikipedia/commons/thumb/8/8c/Memorial_University_of_Newfoundland.jpg/640px-Memorial_University_of_Newfoundland.jpg",
-  "University of Lethbridge":"https://upload.wikimedia.org/wikipedia/commons/thumb/1/1f/University_of_Lethbridge.jpg/640px-University_of_Lethbridge.jpg",
-  "Université de Montréal":"https://upload.wikimedia.org/wikipedia/commons/thumb/e/e3/UdeM_Pavillon_Roger-Gaudry.jpg/640px-UdeM_Pavillon_Roger-Gaudry.jpg",
-  "Université Laval":"https://upload.wikimedia.org/wikipedia/commons/thumb/6/6e/Universite_Laval.jpg/640px-Universite_Laval.jpg",
-  "Concordia University":"https://upload.wikimedia.org/wikipedia/commons/thumb/4/42/Concordia_Hall_Building.jpg/640px-Concordia_Hall_Building.jpg",
-  "TMU":"https://upload.wikimedia.org/wikipedia/commons/thumb/1/17/Ryerson_University_-_Kerr_Hall.jpg/640px-Ryerson_University_-_Kerr_Hall.jpg",
-  "Thompson River University":"https://upload.wikimedia.org/wikipedia/commons/thumb/8/85/Thompson_Rivers_University.jpg/640px-Thompson_Rivers_University.jpg",
-  "MacEwan University":"https://upload.wikimedia.org/wikipedia/commons/thumb/7/70/MacEwan_University.jpg/640px-MacEwan_University.jpg",
-  "NAIT":"https://upload.wikimedia.org/wikipedia/commons/thumb/c/ca/NAIT_Edmonton.jpg/640px-NAIT_Edmonton.jpg",
-  "SAIT":"https://upload.wikimedia.org/wikipedia/commons/thumb/2/22/SAIT_Polytechnic.jpg/640px-SAIT_Polytechnic.jpg",
-  "Algonquin College":"https://upload.wikimedia.org/wikipedia/commons/thumb/8/8d/Algonquin_College_Ottawa_Campus.jpg/640px-Algonquin_College_Ottawa_Campus.jpg",
-  "Humber College":"https://upload.wikimedia.org/wikipedia/commons/thumb/0/07/Humber_College_North_Campus.jpg/640px-Humber_College_North_Campus.jpg",
-  "Sheridan College":"https://upload.wikimedia.org/wikipedia/commons/thumb/5/5f/Sheridan_College_Trafalgar_Campus.jpg/640px-Sheridan_College_Trafalgar_Campus.jpg",
-  "George Brown College":"https://upload.wikimedia.org/wikipedia/commons/thumb/7/74/George_Brown_College_Casa_Loma.jpg/640px-George_Brown_College_Casa_Loma.jpg",
-  "Seneca College":"https://upload.wikimedia.org/wikipedia/commons/thumb/d/d4/Seneca_College_Newnham_Campus.jpg/640px-Seneca_College_Newnham_Campus.jpg",
-  "Ryerson University":"https://upload.wikimedia.org/wikipedia/commons/thumb/1/17/Ryerson_University_-_Kerr_Hall.jpg/640px-Ryerson_University_-_Kerr_Hall.jpg",
-  "Lakehead University":"https://upload.wikimedia.org/wikipedia/commons/thumb/d/d9/Lakehead_University.jpg/640px-Lakehead_University.jpg",
-  "Laurentian University":"https://upload.wikimedia.org/wikipedia/commons/thumb/3/31/Laurentian_University.jpg/640px-Laurentian_University.jpg",
-  "Trent University":"https://upload.wikimedia.org/wikipedia/commons/thumb/e/e4/Trent_University_Bata_Library.jpg/640px-Trent_University_Bata_Library.jpg",
-  "University of Northern British Columbia":"https://upload.wikimedia.org/wikipedia/commons/thumb/6/6c/University_of_Northern_British_Columbia.jpg/640px-University_of_Northern_British_Columbia.jpg",
-  "Mount Royal University":"https://upload.wikimedia.org/wikipedia/commons/thumb/0/09/Mount_Royal_University.jpg/640px-Mount_Royal_University.jpg",
-  "University of Prince Edward Island":"https://upload.wikimedia.org/wikipedia/commons/thumb/0/09/UPEI_campus.jpg/640px-UPEI_campus.jpg",
-  "Cape Breton University":"https://upload.wikimedia.org/wikipedia/commons/thumb/3/3e/Cape_Breton_University.jpg/640px-Cape_Breton_University.jpg",
-  "Saint Mary's University":"https://upload.wikimedia.org/wikipedia/commons/thumb/a/a3/Saint_Mary%27s_University_Halifax.jpg/640px-Saint_Mary%27s_University_Halifax.jpg",
-  "Mount Allison University":"https://upload.wikimedia.org/wikipedia/commons/thumb/7/7d/Mount_Allison_University.jpg/640px-Mount_Allison_University.jpg",
-  "University of New Brunswick":"https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/University_of_New_Brunswick_Old_Arts_Building.jpg/640px-University_of_New_Brunswick_Old_Arts_Building.jpg",
-  "Acadia University":"https://upload.wikimedia.org/wikipedia/commons/thumb/d/d5/Acadia_University.jpg/640px-Acadia_University.jpg",
-  "University of Winnipeg":"https://upload.wikimedia.org/wikipedia/commons/thumb/8/82/University_of_Winnipeg.jpg/640px-University_of_Winnipeg.jpg",
-  "Brandon University":"https://upload.wikimedia.org/wikipedia/commons/thumb/0/04/Brandon_University.jpg/640px-Brandon_University.jpg",
-  "Okanagan College":"https://upload.wikimedia.org/wikipedia/commons/thumb/4/4a/Okanagan_College_Kelowna.jpg/640px-Okanagan_College_Kelowna.jpg",
-  "Kwantlen Polytechnic University":"https://upload.wikimedia.org/wikipedia/commons/thumb/6/6b/Kwantlen_Polytechnic_University.jpg/640px-Kwantlen_Polytechnic_University.jpg",
-  "Douglas College":"https://upload.wikimedia.org/wikipedia/commons/thumb/d/d9/Douglas_College_New_Westminster.jpg/640px-Douglas_College_New_Westminster.jpg",
-  "Capilano University":"https://upload.wikimedia.org/wikipedia/commons/thumb/c/c3/Capilano_University.jpg/640px-Capilano_University.jpg",
-  "Algoma University":"https://upload.wikimedia.org/wikipedia/commons/thumb/7/79/Algoma_University.jpg/640px-Algoma_University.jpg",
-  "University of the Fraser Valley":"https://upload.wikimedia.org/wikipedia/commons/thumb/8/8c/University_of_the_Fraser_Valley.jpg/640px-University_of_the_Fraser_Valley.jpg",
-  "Vancouver Community College":"https://upload.wikimedia.org/wikipedia/commons/thumb/3/31/Vancouver_Community_College.jpg/640px-Vancouver_Community_College.jpg",
-  "British Columbia Institute of Technology":"https://upload.wikimedia.org/wikipedia/commons/thumb/b/b6/BCIT_Burnaby_Campus.jpg/640px-BCIT_Burnaby_Campus.jpg",
-  "Red Deer Polytechnic":"https://upload.wikimedia.org/wikipedia/commons/thumb/0/06/Red_Deer_College.jpg/640px-Red_Deer_College.jpg",
-  "Medicine Hat College":"https://upload.wikimedia.org/wikipedia/commons/thumb/3/35/Medicine_Hat_College.jpg/640px-Medicine_Hat_College.jpg",
-  "Lethbridge College":"https://upload.wikimedia.org/wikipedia/commons/thumb/7/7c/Lethbridge_College.jpg/640px-Lethbridge_College.jpg",
-  "Université de Sherbrooke":"https://upload.wikimedia.org/wikipedia/commons/thumb/e/e9/Université_de_Sherbrooke.jpg/640px-Université_de_Sherbrooke.jpg",
-  "Bishop's University":"https://upload.wikimedia.org/wikipedia/commons/thumb/1/16/Bishop%27s_University.jpg/640px-Bishop%27s_University.jpg",
-  "Concordia University of Edmonton":"https://upload.wikimedia.org/wikipedia/commons/thumb/c/c5/Concordia_University_of_Edmonton.jpg/640px-Concordia_University_of_Edmonton.jpg",
-  "Trinity Western University":"https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/Trinity_Western_University.jpg/640px-Trinity_Western_University.jpg",
-  "Royal Roads University":"https://upload.wikimedia.org/wikipedia/commons/thumb/5/55/Royal_Roads_University.jpg/640px-Royal_Roads_University.jpg",
-  "Vancouver Island University":"https://upload.wikimedia.org/wikipedia/commons/thumb/9/9a/Vancouver_Island_University.jpg/640px-Vancouver_Island_University.jpg",
-};
+// ── Campus photo loader ──────────────────────────────────────────────────────
+// Source 1: Custom URL pasted by team (saved to sheet)
+// Source 2: Apps Script proxy → Wikipedia (server-side, no CORS)
+// Source 3: Styled gradient placeholder (always reliable fallback)
 
 function loadCampusPhoto(d){
-  const wrap=document.getElementById('pr-photo');
-  const col=getGroupColor(d.group);
+  const wrap = document.getElementById('pr-photo');
+  const col  = getGroupColor(d.group);
 
-  // Styled placeholder — always ready
-  const ph=()=>{
-    wrap.innerHTML=`<div class="photo-placeholder" style="background:linear-gradient(135deg,${col}33,${col}55)">
-      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="${col}" stroke-width="1.2" opacity="0.7"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-      <span style="color:rgba(255,255,255,.75);font-size:13px;font-weight:600;text-align:center;padding:0 20px;margin-top:8px;line-height:1.3">${d.institution}</span>
-      <span style="color:rgba(255,255,255,.4);font-size:11px;margin-top:2px">${[d.campus,d.province].filter(Boolean).join(' · ')}</span>
-    </div>`;
+  // Always show placeholder immediately while we fetch
+  const showPlaceholder = () => {
+    wrap.innerHTML = `
+      <div class="photo-placeholder" style="
+        background:linear-gradient(135deg,${col}33 0%,${col}66 100%);
+        display:flex;flex-direction:column;align-items:center;
+        justify-content:center;gap:8px;height:100%;width:100%;
+      ">
+        <svg width="36" height="36" viewBox="0 0 24 24" fill="none"
+          stroke="${col}" stroke-width="1.2" opacity="0.8">
+          <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
+          <polyline points="9 22 9 12 15 12 15 22"/>
+        </svg>
+        <span style="color:rgba(255,255,255,.8);font-size:13px;font-weight:600;
+          text-align:center;padding:0 20px;line-height:1.3">${d.institution}</span>
+        <span style="color:rgba(255,255,255,.45);font-size:11px">
+          ${[d.campus, d.province].filter(Boolean).join(' · ')}
+        </span>
+      </div>`;
   };
 
-  // Helper: try loading an image URL, call onFail if it errors
-  const tryImg=(src,onFail)=>{
-    const img=new Image();
-    img.crossOrigin='anonymous';
-    img.onload=()=>{
-      wrap.innerHTML='';
-      img.style.cssText='width:100%;height:100%;object-fit:cover;display:block';
+  // Load an image by URL — no crossOrigin (breaks Wikimedia CORS)
+  const showImg = (src) => {
+    const img = document.createElement('img');
+    img.style.cssText = 'width:100%;height:100%;object-fit:cover;display:block';
+    img.alt = d.institution;
+    img.onload = () => {
+      wrap.innerHTML = '';
       wrap.appendChild(img);
-      wrap.insertAdjacentHTML('beforeend','<div class="photo-overlay"></div>');
+      wrap.insertAdjacentHTML('beforeend', '<div class="photo-overlay"></div>');
     };
-    img.onerror=()=>{ if(onFail)onFail(); };
-    img.src=src;
+    img.onerror = showPlaceholder;
+    img.src = src;
   };
 
-  // Layer 1: Custom URL pasted by team
-  if(d.custom_photo&&d.custom_photo.trim()){
-    ph(); // show placeholder while loading
-    tryImg(d.custom_photo.trim(), ph);
+  // Show placeholder right away
+  showPlaceholder();
+
+  // Layer 1: Custom URL (highest priority — team pasted it)
+  if (d.custom_photo && d.custom_photo.trim()) {
+    showImg(d.custom_photo.trim());
     return;
   }
 
-  // Layer 2: Curated Wikimedia Commons (direct URL, no API, no CORS)
-  const curated=CAMPUS_PHOTOS[d.institution];
-  if(curated){
-    ph();
-    tryImg(curated, ()=>{
-      // Layer 3: Apps Script proxy → Wikipedia
-      fetchPhotoViaProxy(d, ph);
-    });
-    return;
+  // Layer 2: Apps Script proxy fetches Wikipedia image server-side
+  // Apps Script can call any URL freely — no CORS, no API key needed
+  if (!CFG.SCRIPT_URL.includes('YOUR_SCRIPT_ID')) {
+    const name = encodeURIComponent(d.institution);
+    fetch(CFG.SCRIPT_URL + '?action=getPhoto&name=' + name, {
+      signal: AbortSignal.timeout(8000)
+    })
+      .then(r => r.ok ? r.json() : Promise.reject())
+      .then(data => {
+        if (data && data.url) showImg(data.url);
+        // else keep placeholder
+      })
+      .catch(() => { /* keep placeholder */ });
   }
-
-  // Layer 3: Apps Script proxy → Wikipedia (server-side, no CORS issues)
-  ph();
-  fetchPhotoViaProxy(d, ph);
-}
-
-async function fetchPhotoViaProxy(d, fallback){
-  if(CFG.SCRIPT_URL.includes('YOUR_SCRIPT_ID')){fallback();return;}
-  try{
-    const name=encodeURIComponent(d.institution);
-    const r=await fetch(CFG.SCRIPT_URL+'?action=getPhoto&name='+name, {signal:AbortSignal.timeout(6000)});
-    if(!r.ok)throw new Error();
-    const data=await r.json();
-    if(data.url){
-      const wrap=document.getElementById('pr-photo');
-      const img=new Image();
-      img.onload=()=>{
-        wrap.innerHTML='';
-        img.style.cssText='width:100%;height:100%;object-fit:cover;display:block';
-        wrap.appendChild(img);
-        wrap.insertAdjacentHTML('beforeend','<div class="photo-overlay"></div>');
-      };
-      img.onerror=fallback;
-      img.src=data.url;
-    }else{fallback();}
-  }catch{fallback();}
+  // If no script URL configured, placeholder stays
 }
 
 
