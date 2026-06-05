@@ -225,10 +225,34 @@ function doGet(e) {
     if (action === 'getAll')    return respond(getAllCampuses());
     if (action === 'getGroups') return respond(getGroups());
     if (action === 'getHubs')   return respond(getHubs());
+    if (action === 'getPhoto')  return respond(getPhoto(e.parameter.name || ''));
     if (action === 'ping')      return respond({ ok: true, ts: new Date().toISOString() });
     return respond({ error: 'Unknown GET action: ' + action });
   } catch(err) {
     return respond({ error: err.message, stack: err.stack });
+  }
+}
+
+// ── GET PHOTO — fetches Wikipedia image server-side (no CORS issues) ────────
+function getPhoto(institutionName) {
+  if (!institutionName) return { url: null };
+  try {
+    const encoded = encodeURIComponent(institutionName);
+    const url = 'https://en.wikipedia.org/w/api.php?action=query&titles='
+      + encoded + '&prop=pageimages&format=json&pithumbsize=800&piprop=thumbnail';
+    const res  = UrlFetchApp.fetch(url, { muteHttpExceptions: true });
+    const data = JSON.parse(res.getContentText());
+    const pages = data && data.query && data.query.pages;
+    if (!pages) return { url: null };
+    const page = Object.values(pages)[0];
+    const imgUrl = page && page.thumbnail && page.thumbnail.source;
+    // Filter out logos, icons, shields
+    if (imgUrl && !imgUrl.match(/logo|icon|shield|flag|coat|emblem|badge/i)) {
+      return { url: imgUrl };
+    }
+    return { url: null };
+  } catch(e) {
+    return { url: null, error: e.message };
   }
 }
 
