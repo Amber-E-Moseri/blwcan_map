@@ -170,9 +170,10 @@ function _loadHubsList_() {
 
 // ── Configuration ────────────────────────────────────────────────────────────
 
-const SRC_SHEET     = 'Campuses';       // Your existing data tab — READ ONLY
+const SRC_SHEET     = 'Campuses';         // Your existing data tab — READ ONLY
 const OVERLAY_SHEET = 'BLW_CAN_Campuses'; // Created automatically — app writes here
-const HUB_THRESHOLD = 25;              // km — beyond this = Needs Coverage Plan
+const LOG_SHEET     = 'BLW_CAN_ChangeLog'; // Status change audit log
+const HUB_THRESHOLD = 25;                 // km — beyond this = Needs Coverage Plan
 
 // Overlay sheet column headers (A → P)
 const OV_HEADERS = [
@@ -452,7 +453,84 @@ function upsertRecord(p) {
   // Color-code the status cell
   colorStatusCell(sheet, rowIdx, p.status);
 
+  // Log status change if status was updated
+  const prevStatus = (allData[rowIdx-1] && rowIdx > 1) ? String(allData[rowIdx-1][5]||'').trim() : '';
+  const newStatus  = p.status || 'Not Reached';
+  if (newStatus && newStatus !== prevStatus) {
+    logStatusChange({
+      institution:  p.institution || '',
+      campus:       p.campus      || '',
+      group:        p.group       || '',
+      subgroup:     p.subgroup    || '',
+      by,
+      oldStatus:    prevStatus,
+      newStatus,
+      joinKey,
+    });
+  }
+
   return { success: true, joinKey, row: rowIdx, updatedBy: by };
+}
+
+// ── STATUS CHANGE LOG ────────────────────────────────────────────────────────
+function logStatusChange(p) {
+  try {
+    const ss    = SpreadsheetApp.getActiveSpreadsheet();
+    let   sheet = ss.getSheetByName(LOG_SHEET);
+
+    if (!sheet) {
+      sheet = ss.insertSheet(LOG_SHEET);
+      const hRow = sheet.getRange(1, 1, 1, LOG_HEADERS.length);
+      hRow.setValues([['Timestamp','Institution','Campus','Group','Sub-Group',
+                       'Changed By','Old Status','New Status','Join Key']]);
+      hRow.setBackground('#0d1117').setFontColor('#fff')
+          .setFontWeight('bold').setFontSize(11);
+      sheet.setFrozenRows(1);
+      sheet.setRowHeight(1, 36);
+      [160,200,160,110,150,180,160,160,260]
+        .forEach((w,i)=>sheet.setColumnWidth(i+1,w));
+
+      // Color-code New Status column (H)
+      const pal = {
+        'Established Fellowship':{ bg:'#e6f4ea', fg:'#1e8e3e' },
+        'Pioneering Fellowship': { bg:'#fef7e0', fg:'#b46a00' },
+        'Influenced':            { bg:'#e8f0fe', fg:'#1a73e8' },
+        'Not Reached':           { bg:'#fce8e6', fg:'#d93025' },
+      };
+      const rules = sheet.getConditionalFormatRules();
+      const col   = sheet.getRange('H2:H10000');
+      Object.entries(pal).forEach(([v,c])=>{
+        rules.push(SpreadsheetApp.newConditionalFormatRule()
+          .whenTextEqualTo(v).setBackground(c.bg).setFontColor(c.fg).setBold(true)
+          .setRanges([col]).build());
+      });
+      sheet.setConditionalFormatRules(rules);
+    }
+
+    const now = Utilities.formatDate(
+      new Date(), Session.getScriptTimeZone(), 'yyyy-MM-dd HH:mm:ss'
+    );
+    sheet.appendRow([
+      now,
+      p.institution,
+      p.campus,
+      p.group,
+      p.subgroup,
+      p.by,
+      p.oldStatus  || '(new)',
+      p.newStatus,
+      p.joinKey,
+    ]);
+
+    // Alternate row shading
+    const row = sheet.getLastRow();
+    sheet.getRange(row, 1, 1, LOG_HEADERS.length)
+      .setBackground(row % 2 === 0 ? '#f8f9fa' : '#ffffff');
+
+  } catch(e) {
+    Logger.log('Log error: ' + e.message);
+    // Don't throw — logging failure should not break the save
+  }
 }
 
 // ── OVERLAY SHEET — get or create ────────────────────────────────────────────
