@@ -330,7 +330,7 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);color:var(--g900);
 #pr-photo{width:min(520px,100%);height:140px;border-radius:14px 14px 0 0;overflow:hidden;position:relative;background:linear-gradient(135deg,#1a2332,#0d2040);display:flex;align-items:center;justify-content:center;flex-shrink:0}
 #pr-photo img{width:100%;height:100%;object-fit:cover;transition:opacity .3s}
 #pr-photo .photo-overlay{position:absolute;inset:0;background:linear-gradient(to bottom,transparent 40%,rgba(13,17,23,.8))}
-#pr-photo .photo-placeholder{display:flex;flex-direction:column;align-items:center;gap:6px;color:rgba(255,255,255,.25);font-size:12px}
+#pr-photo .photo-placeholder{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;color:rgba(255,255,255,.25);font-size:12px;height:100%;width:100%}
 
 #pr-card{width:min(520px,100%);background:rgba(13,17,23,.92);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,.1);border-radius:0 0 16px 16px;padding:16px 18px 14px;transition:opacity .2s}
 #pr-card.fading{opacity:0}
@@ -388,7 +388,83 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);color:var(--g900);
 .key-text strong{font-size:12px;display:block;color:var(--g900)}
 .key-text span{font-size:11px;color:var(--g600);line-height:1.4}
 
-@media(max-width:600px){:root{--panel:100vw}#tally{display:none}#reg-sidebar{width:100%;border-left:none;border-top:1px solid var(--g200)}#reg-body{flex-direction:column}}
+@media(max-width:768px){
+  :root{--panel:100vw}
+
+  /* Top bar — stack search below logo row */
+  #topbar{padding:8px 10px;gap:6px}
+  #logo-pill{height:38px;padding:0 11px}
+  .logo-text{font-size:14px}
+  #search-pill{max-width:100%;order:3;flex-basis:100%}
+  #nav-pills{gap:5px}
+  .nav-pill{padding:0 10px;height:38px;font-size:11px;gap:5px}
+  .nav-pill span{display:none} /* hide sync label on mobile */
+
+  /* Chips — scrollable row, no wrap */
+  #chips{top:100px;left:0;right:0;max-width:100%;
+    padding:0 10px;flex-wrap:nowrap;overflow-x:auto;
+    scrollbar-width:none;-ms-overflow-style:none}
+  #chips::-webkit-scrollbar{display:none}
+  .chip{flex-shrink:0;font-size:11px;padding:5px 10px}
+
+  /* Tally — compact on mobile */
+  #tally{bottom:16px;font-size:11px}
+  .tally-num{font-size:14px}
+  .tally-item{padding:6px 8px}
+  .prog-wrap{min-width:100px;padding:0 8px}
+
+  /* Panel — full screen */
+  #panel{width:100vw}
+  #pbody{padding:10px 12px 80px}
+
+  /* Hub tooltip — full width */
+  #hub-tip{left:8px;right:8px;max-width:none;top:auto;bottom:80px}
+
+  /* Key panel — bottom of screen */
+  #key-panel{right:8px;left:8px;bottom:80px;width:auto}
+
+  /* Regional */
+  #reg-body{flex-direction:column}
+  #reg-sidebar{width:100%;border-left:none;border-top:1px solid var(--g200);
+    max-height:50vh;overflow-y:auto}
+  #reg-map{height:50vw;min-height:200px}
+
+  /* Prayer mode */
+  #pr-top{padding:10px 12px}
+  .pr-logo{font-size:15px}
+  #pr-filters{padding:8px 10px 6px;gap:5px}
+  .pr-filter-group{gap:4px}
+  .pr-filter-lbl{min-width:38px;font-size:9px}
+  .pr-chip{font-size:10px;padding:3px 9px}
+  #pr-bottom{padding:0 8px 14px;gap:8px}
+  #pr-photo{height:120px;border-radius:10px 10px 0 0}
+  #pr-card{padding:12px 14px 10px}
+  .pr-inst{font-size:15px}
+  #pr-controls{gap:6px;padding:6px 10px;flex-wrap:wrap;justify-content:center}
+  .pr-btn{font-size:11px;padding:5px 8px}
+  #pr-counter{font-size:10px;padding:0 4px}
+  #pr-interval{width:38px;font-size:10px}
+
+  /* Spotify widget — smaller on mobile */
+  #spotify-wrap{top:10px;right:10px}
+  #sp-embed iframe{width:220px!important;height:80px!important}
+  #sp-url{width:180px}
+
+  /* View-only banner */
+  #vo-banner{font-size:11px;padding:6px 12px}
+
+  /* Panel tabs */
+  .p-tab{font-size:11px;padding:8px 3px}
+
+  /* Info card */
+  .info-card{padding:10px 11px}
+  .ic-val{font-size:12px}
+}
+
+@media(max-width:400px){
+  #nav-pills .nav-pill:nth-child(4){display:none} /* hide Key btn on tiny screens */
+  .tally-item:nth-child(5){display:none} /* hide needs plan on tiny */
+}
 </style>
 </head>
 <body>
@@ -1054,7 +1130,8 @@ function updateTally(){
 function openPanel(id){
   currentId=id;
   const d=DATA[id];
-  const canEdit=SES.admin||(SES.subgroup&&!SES.viewOnly&&!fullScope&&(d.subgroup===SES.subgroup||!d.subgroup));
+  // Anyone with a subgroup selected can edit — changes are logged with their identity
+  const canEdit=SES.admin||(SES.subgroup&&!SES.viewOnly);
 
   document.getElementById('p-empty').style.display='none';
   const pc=document.getElementById('p-content');pc.style.display='flex';
@@ -1602,65 +1679,67 @@ function loadCampusPhoto(d){
   const wrap = document.getElementById('pr-photo');
   const col  = getGroupColor(d.group);
 
-  // Always show placeholder immediately while we fetch
   const showPlaceholder = () => {
-    wrap.innerHTML = `
-      <div class="photo-placeholder" style="
-        background:linear-gradient(135deg,${col}33 0%,${col}66 100%);
-        display:flex;flex-direction:column;align-items:center;
-        justify-content:center;gap:8px;height:100%;width:100%;
-      ">
-        <svg width="36" height="36" viewBox="0 0 24 24" fill="none"
-          stroke="${col}" stroke-width="1.2" opacity="0.8">
-          <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
-          <polyline points="9 22 9 12 15 12 15 22"/>
-        </svg>
-        <span style="color:rgba(255,255,255,.8);font-size:13px;font-weight:600;
-          text-align:center;padding:0 20px;line-height:1.3">${d.institution}</span>
-        <span style="color:rgba(255,255,255,.45);font-size:11px">
-          ${[d.campus, d.province].filter(Boolean).join(' · ')}
-        </span>
-      </div>`;
+    wrap.innerHTML = `<div style="
+      background:linear-gradient(135deg,${col}44,${col}88);
+      display:flex;flex-direction:column;align-items:center;
+      justify-content:center;gap:8px;height:100%;width:100%;padding:20px">
+      <svg width="38" height="38" viewBox="0 0 24 24" fill="none"
+        stroke="white" stroke-width="1.1" opacity="0.6">
+        <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
+        <polyline points="9 22 9 12 15 12 15 22"/>
+      </svg>
+      <span style="color:rgba(255,255,255,.9);font-size:13px;font-weight:600;
+        text-align:center;line-height:1.4">${d.institution}</span>
+      <span style="color:rgba(255,255,255,.55);font-size:11px">
+        ${[d.campus,d.province].filter(Boolean).join(' · ')}
+      </span>
+    </div>`;
   };
 
-  // Load an image by URL — no crossOrigin (breaks Wikimedia CORS)
   const showImg = (src) => {
-    const img = document.createElement('img');
+    const img = new Image();
     img.style.cssText = 'width:100%;height:100%;object-fit:cover;display:block';
-    img.alt = d.institution;
     img.onload = () => {
       wrap.innerHTML = '';
       wrap.appendChild(img);
-      wrap.insertAdjacentHTML('beforeend', '<div class="photo-overlay"></div>');
+      wrap.insertAdjacentHTML('beforeend','<div class="photo-overlay"></div>');
     };
     img.onerror = showPlaceholder;
     img.src = src;
   };
 
-  // Show placeholder right away
+  // Always show placeholder immediately
   showPlaceholder();
 
-  // Layer 1: Custom URL (highest priority — team pasted it)
+  // Layer 1: Custom URL — always wins, no CORS issues
   if (d.custom_photo && d.custom_photo.trim()) {
     showImg(d.custom_photo.trim());
     return;
   }
 
-  // Layer 2: Apps Script proxy fetches Wikipedia image server-side
-  // Apps Script can call any URL freely — no CORS, no API key needed
+  // Layer 2: Check localStorage cache first (avoid repeat API calls)
+  const cacheKey = 'photo_' + d.institution;
+  const cached = localStorage.getItem(cacheKey);
+  if (cached === 'none') return; // previously confirmed no photo
+  if (cached) { showImg(cached); return; }
+
+  // Layer 3: Apps Script proxy — fetches Wikipedia server-side, no CORS
   if (!CFG.SCRIPT_URL.includes('YOUR_SCRIPT_ID')) {
-    const name = encodeURIComponent(d.institution);
-    fetch(CFG.SCRIPT_URL + '?action=getPhoto&name=' + name, {
+    fetch(CFG.SCRIPT_URL + '?action=getPhoto&name=' + encodeURIComponent(d.institution), {
       signal: AbortSignal.timeout(8000)
     })
-      .then(r => r.ok ? r.json() : Promise.reject())
-      .then(data => {
-        if (data && data.url) showImg(data.url);
-        // else keep placeholder
-      })
-      .catch(() => { /* keep placeholder */ });
+    .then(r => r.ok ? r.json() : Promise.reject())
+    .then(data => {
+      if (data && data.url) {
+        localStorage.setItem(cacheKey, data.url); // cache for next time
+        showImg(data.url);
+      } else {
+        localStorage.setItem(cacheKey, 'none'); // cache miss
+      }
+    })
+    .catch(() => { /* placeholder stays */ });
   }
-  // If no script URL configured, placeholder stays
 }
 
 
