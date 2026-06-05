@@ -137,6 +137,84 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);color:var(--g900);
 #p-empty svg{opacity:.25}
 #p-empty p{font-size:13px;line-height:1.5}
 .pdiv{height:1px;background:var(--g100)}
+
+/* Panel tabs */
+#p-tabs{display:flex;border-bottom:1px solid var(--g200);flex-shrink:0;padding:0 16px}
+.p-tab{flex:1;padding:9px 4px;font-size:12px;font-weight:600;background:none;border:none;
+  color:var(--g500);cursor:pointer;border-bottom:2px solid transparent;
+  font-family:var(--font);transition:all .15s;white-space:nowrap}
+.p-tab:hover{color:var(--g700)}
+.p-tab.active{color:var(--blue);border-color:var(--blue)}
+.p-tab-pane{display:none;flex-direction:column;gap:12px;padding:14px 0}
+.p-tab-pane.active{display:flex}
+
+/* Info card grid */
+.info-card{background:var(--g50);border-radius:10px;padding:12px 14px;display:flex;flex-direction:column;gap:8px}
+.info-card-row{display:flex;gap:12px}
+.info-card-item{flex:1;min-width:0}
+.info-card-item.full{flex:none;width:100%}
+.ic-lbl{font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--g500);margin-bottom:2px}
+.ic-val{font-size:13px;color:var(--g900);font-weight:500;line-height:1.3;word-break:break-word}
+
+/* Contact card */
+.contact-info-card{background:var(--g50);border-radius:10px;padding:11px 14px;display:flex;flex-direction:column;gap:8px}
+.cic-row{display:flex;align-items:center;gap:9px;font-size:13px;color:var(--g800)}
+.cic-row svg{color:var(--g400);flex-shrink:0}
+
+/* Display text */
+.display-text{font-size:13px;color:var(--g700);line-height:1.6;white-space:pre-wrap;
+  background:var(--g50);border-radius:10px;padding:11px 14px}
+
+/* Prayer points display */
+.pp-display-list{display:flex;flex-direction:column;gap:6px}
+.pp-display-item{display:flex;align-items:flex-start;gap:8px;font-size:13px;
+  color:var(--g800);background:var(--g50);border-radius:8px;padding:9px 12px;line-height:1.4}
+.pp-display-item::before{content:"🙏";font-size:12px;flex-shrink:0;margin-top:1px}
+
+/* Tab empty state */
+.tab-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:8px;color:var(--g400);text-align:center;padding:32px 20px}
+.tab-empty svg{opacity:.3}
+.tab-empty p{font-size:12px;line-height:1.5;color:var(--g500)}
+
+/* Panel tabs */
+#p-tabs{display:flex;border-bottom:1px solid var(--g200);flex-shrink:0;padding:0 16px}
+.p-tab{flex:1;padding:9px 4px;font-size:12px;font-weight:600;background:none;border:none;
+  color:var(--g500);cursor:pointer;border-bottom:2px solid transparent;
+  font-family:var(--font);transition:all .15s;white-space:nowrap}
+.p-tab:hover{color:var(--g700)}
+.p-tab.active{color:var(--blue);border-color:var(--blue)}
+.p-tab-pane{display:none;flex-direction:column;gap:12px;padding:14px 0}
+.p-tab-pane.active{display:flex}
+
+/* Info card grid */
+.info-card{background:var(--g50);border-radius:10px;padding:12px 14px;display:flex;flex-direction:column;gap:8px}
+.info-card-row{display:flex;gap:12px}
+.info-card-item{flex:1;min-width:0}
+.info-card-item.full{flex:none;width:100%}
+.ic-lbl{font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--g500);margin-bottom:2px}
+.ic-val{font-size:13px;color:var(--g900);font-weight:500;line-height:1.3;word-break:break-word}
+
+/* Contact card */
+.contact-info-card{background:var(--g50);border-radius:10px;padding:11px 14px;display:flex;flex-direction:column;gap:8px}
+.cic-row{display:flex;align-items:center;gap:9px;font-size:13px;color:var(--g800)}
+.cic-row svg{color:var(--g400);flex-shrink:0}
+
+/* Display text */
+.display-text{font-size:13px;color:var(--g700);line-height:1.6;white-space:pre-wrap;
+  background:var(--g50);border-radius:10px;padding:11px 14px}
+
+/* Prayer points display */
+.pp-display-list{display:flex;flex-direction:column;gap:6px}
+.pp-display-item{display:flex;align-items:flex-start;gap:8px;font-size:13px;
+  color:var(--g800);background:var(--g50);border-radius:8px;padding:9px 12px;line-height:1.4}
+.pp-display-item::before{content:"🙏";font-size:12px;flex-shrink:0;margin-top:1px}
+
+/* Tab empty state */
+.tab-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:8px;color:var(--g400);text-align:center;padding:32px 20px}
+.tab-empty svg{opacity:.3}
+.tab-empty p{font-size:12px;line-height:1.5;color:var(--g500)}
 .sec{font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--g500);margin-bottom:6px}
 .irow{display:flex;gap:8px;align-items:flex-start;margin-bottom:6px}
 .irow svg{color:var(--g400);flex-shrink:0;margin-top:1px}
@@ -217,6 +295,30 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);color:var(--g900);
 #sp-embed{width:290px;border-radius:12px;overflow:hidden;display:none}
 #sp-embed iframe{border-radius:12px;display:block}
 #sp-open{display:none}
+
+/* Prayer filter chips */
+#pr-filters{
+  flex-shrink:0;padding:10px 16px 8px;
+  border-bottom:1px solid rgba(255,255,255,.07);
+  display:flex;flex-direction:column;gap:7px;
+  background:rgba(255,255,255,.02);
+}
+.pr-filter-group{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.pr-filter-lbl{
+  font-size:10px;font-weight:700;letter-spacing:.07em;
+  text-transform:uppercase;color:rgba(255,255,255,.35);
+  margin-right:2px;white-space:nowrap;min-width:46px;
+}
+.pr-chip{
+  display:flex;align-items:center;gap:5px;
+  background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);
+  border-radius:20px;padding:4px 11px;
+  font-family:var(--font);font-size:11px;font-weight:500;
+  color:rgba(255,255,255,.6);cursor:pointer;
+  transition:all .15s;white-space:nowrap;
+}
+.pr-chip:hover{background:rgba(255,255,255,.12);color:#fff}
+.pr-chip.on{background:var(--blue);border-color:var(--blue);color:#fff}
 
 /* Prayer card area */
 #pr-bottom{position:absolute;bottom:0;left:0;right:0;display:flex;flex-direction:column;align-items:center;gap:10px;padding:0 16px 18px}
@@ -426,6 +528,8 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);color:var(--g900);
       <p>Click a campus on the map<br>to view details, add notes<br>and prayer points.</p>
     </div>
     <div id="p-content" style="display:none;flex-direction:column;height:100%">
+
+      <!-- ── HEADER ── -->
       <div id="panel-head">
         <div style="flex:1;min-width:0">
           <div id="p-inst">—</div>
@@ -437,69 +541,180 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);color:var(--g900);
         </button>
       </div>
       <div id="p-badges"></div>
+
+      <!-- read-only banner -->
       <div id="panel-ro-banner">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
         View only — <strong style="margin-left:2px">select a sub-group to edit</strong>
         <button class="vo-btn" onclick="changeGroup()" style="margin-left:auto">Switch</button>
       </div>
-      <div id="pbody">
-        <div class="pdiv"></div>
-        <!-- Location -->
-        <div class="sec">Location</div>
-        <div class="irow"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg><span id="d-hub">—</span></div>
-        <div class="irow"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg><span id="d-dist">—</span></div>
-        <div class="irow"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg><span id="d-addr" style="font-size:11px;color:var(--g600)">—</span></div>
-        <!-- Needs plan warning -->
-        <div class="needs-warn" id="needs-warn" style="display:none">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-          No hub within 25 km — needs a coverage plan
-        </div>
-        <div class="pdiv"></div>
-        <!-- Status -->
-        <div class="fgrp">
-          <label>Status</label>
-          <select id="d-status" onchange="onStatusChange()">
-            <option value="Established Fellowship">✅ Established Fellowship</option>
-            <option value="Pioneering Fellowship">🟡 Pioneering Fellowship</option>
-            <option value="Influenced">🔵 Influenced</option>
-            <option value="Not Reached">🔴 Not Reached</option>
-          </select>
-        </div>
-        <div class="pdiv"></div>
-        <!-- Contact -->
-        <div class="sec">Contact</div>
-        <div class="two-col">
-          <div class="fgrp"><label>Name</label><input id="d-cname" type="text" placeholder="Contact name"></div>
-          <div class="fgrp"><label>Phone</label><input id="d-cphone" type="tel" placeholder="+1 000 000 0000"></div>
-        </div>
-        <div class="pdiv"></div>
-        <!-- Notes & Strategy -->
-        <div class="fgrp"><label>Campus Notes</label><textarea id="d-notes" placeholder="Visit history, open doors, challenges…"></textarea></div>
-        <div class="fgrp"><label>Strategy</label><textarea id="d-strategy" placeholder="Outreach plan, timeline, key events…"></textarea></div>
-        <div class="pdiv"></div>
-        <!-- Prayer Points -->
-        <div class="sec">Prayer Points</div>
-        <div class="pp-list" id="pp-list"></div>
-        <div class="pp-add">
-          <input type="text" id="pp-input" placeholder="Add a prayer point…" onkeydown="if(event.key==='Enter')addPrayerPoint()">
-          <button onclick="addPrayerPoint()">+ Add</button>
-        </div>
-        <div class="fgrp" style="margin-top:8px"><label>Prayer Notes</label><textarea id="d-pnotes" placeholder="Intercession notes, scriptures, burdens…"></textarea></div>
-        <div class="pdiv"></div>
-        <!-- Coverage Plan (shown only if needs_plan) -->
-        <div id="coverage-section" style="display:none">
-          <div class="sec">Coverage Plan</div>
-          <div class="fgrp"><textarea id="d-coverage" placeholder="Curated travel plan — who goes, when, which campuses to visit together…"></textarea></div>
-          <div class="pdiv"></div>
-        </div>
-        <!-- Custom photo -->
-        <div class="fgrp"><label>Custom Photo URL <span style="font-size:10px;color:var(--g500);font-weight:400">(optional override)</span></label><input id="d-photo" type="url" placeholder="https://…"></div>
-        <div class="pdiv"></div>
-        <button id="save-btn" onclick="saveRecord()">Save to Sheet</button>
-        <div id="save-fb"></div>
+
+      <!-- ── TAB BAR ── -->
+      <div id="p-tabs">
+        <button class="p-tab active" onclick="switchPanelTab('info')">Info</button>
+        <button class="p-tab" onclick="switchPanelTab('notes')">Notes</button>
+        <button class="p-tab" onclick="switchPanelTab('prayer')">🙏 Prayer</button>
+        <button class="p-tab" onclick="switchPanelTab('edit')">Edit</button>
       </div>
-    </div>
-  </div>
+
+      <div id="pbody">
+
+        <!-- ── INFO TAB ── -->
+        <div class="p-tab-pane active" id="ptab-info">
+          <!-- Info card -->
+          <div class="info-card">
+            <div class="info-card-row">
+              <div class="info-card-item">
+                <div class="ic-lbl">Hub</div>
+                <div class="ic-val" id="d-hub">—</div>
+              </div>
+              <div class="info-card-item">
+                <div class="ic-lbl">Distance</div>
+                <div class="ic-val" id="d-dist">—</div>
+              </div>
+            </div>
+            <div class="info-card-row">
+              <div class="info-card-item">
+                <div class="ic-lbl">Province</div>
+                <div class="ic-val" id="d-province">—</div>
+              </div>
+              <div class="info-card-item">
+                <div class="ic-lbl">Group</div>
+                <div class="ic-val" id="d-group">—</div>
+              </div>
+            </div>
+            <div class="info-card-row" id="ic-subgroup-row">
+              <div class="info-card-item full">
+                <div class="ic-lbl">Sub-group</div>
+                <div class="ic-val" id="d-subgroup-val">—</div>
+              </div>
+            </div>
+            <div class="info-card-row">
+              <div class="info-card-item full">
+                <div class="ic-lbl">Address</div>
+                <div class="ic-val" id="d-addr" style="font-size:11px;color:var(--g600)">—</div>
+              </div>
+            </div>
+          </div>
+          <!-- Needs plan warning -->
+          <div class="needs-warn" id="needs-warn" style="display:none">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            No hub within 25 km — needs a coverage plan
+          </div>
+          <!-- Contact card -->
+          <div id="contact-card" style="display:none">
+            <div class="pdiv"></div>
+            <div class="sec">Contact</div>
+            <div class="contact-info-card">
+              <div class="cic-row" id="cic-name-row">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                <span id="d-cname-display">—</span>
+              </div>
+              <div class="cic-row" id="cic-phone-row">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.81 19.79 19.79 0 01.07 1.18 2 2 0 012.03 0h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>
+                <a id="d-cphone-display" href="#" style="color:var(--blue);text-decoration:none;font-size:13px">—</a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── NOTES TAB ── -->
+        <div class="p-tab-pane" id="ptab-notes">
+          <div id="notes-display-card" style="display:none">
+            <div class="sec">Campus Notes</div>
+            <div class="display-text" id="d-notes-display"></div>
+            <div class="pdiv"></div>
+          </div>
+          <div id="strategy-display-card" style="display:none">
+            <div class="sec">Strategy</div>
+            <div class="display-text" id="d-strategy-display"></div>
+          </div>
+          <div id="coverage-display-card" style="display:none">
+            <div class="pdiv"></div>
+            <div class="sec">Coverage Plan</div>
+            <div class="needs-warn" style="margin-bottom:8px">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>
+              Uncovered campus
+            </div>
+            <div class="display-text" id="d-coverage-display"></div>
+          </div>
+          <div id="notes-empty" class="tab-empty">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            <p>No notes yet.<br>Go to Edit to add notes.</p>
+          </div>
+        </div>
+
+        <!-- ── PRAYER TAB ── -->
+        <div class="p-tab-pane" id="ptab-prayer">
+          <div id="prayer-points-card" style="display:none">
+            <div class="sec">Prayer Points</div>
+            <div class="pp-display-list" id="pp-display-list"></div>
+            <div class="pdiv"></div>
+          </div>
+          <div id="prayer-notes-card" style="display:none">
+            <div class="sec">Prayer Notes</div>
+            <div class="display-text" id="d-pnotes-display"></div>
+          </div>
+          <div id="prayer-empty" class="tab-empty">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            <p>No prayer points yet.<br>Go to Edit to add them.</p>
+          </div>
+          <!-- Quick add prayer point -->
+          <div id="prayer-quick-add" style="display:none">
+            <div class="pdiv"></div>
+            <div class="pp-add">
+              <input type="text" id="pp-input" placeholder="Add a prayer point…" onkeydown="if(event.key==='Enter')addPrayerPoint()">
+              <button onclick="addPrayerPoint()">+ Add</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── EDIT TAB ── -->
+        <div class="p-tab-pane" id="ptab-edit">
+          <div class="fgrp">
+            <label>Status</label>
+            <select id="d-status" onchange="onStatusChange()">
+              <option value="Established Fellowship">✅ Established Fellowship</option>
+              <option value="Pioneering Fellowship">🟡 Pioneering Fellowship</option>
+              <option value="Influenced">🔵 Influenced</option>
+              <option value="Not Reached">🔴 Not Reached</option>
+            </select>
+          </div>
+          <div class="pdiv"></div>
+          <div class="sec">Contact</div>
+          <div class="two-col">
+            <div class="fgrp"><label>Name</label><input id="d-cname" type="text" placeholder="Contact name"></div>
+            <div class="fgrp"><label>Phone</label><input id="d-cphone" type="tel" placeholder="+1 000 000 0000"></div>
+          </div>
+          <div class="pdiv"></div>
+          <div class="fgrp"><label>Campus Notes</label><textarea id="d-notes" placeholder="Visit history, open doors, challenges…"></textarea></div>
+          <div class="fgrp"><label>Strategy</label><textarea id="d-strategy" placeholder="Outreach plan, timeline, key events…"></textarea></div>
+          <div class="pdiv"></div>
+          <div class="sec">Prayer Points</div>
+          <div class="pp-list" id="pp-list"></div>
+          <div class="pp-add" id="pp-add-edit">
+            <input type="text" id="pp-input-edit" placeholder="Add a prayer point…" onkeydown="if(event.key==='Enter')addPrayerPointEdit()">
+            <button onclick="addPrayerPointEdit()">+ Add</button>
+          </div>
+          <div class="fgrp" style="margin-top:8px"><label>Prayer Notes</label><textarea id="d-pnotes" placeholder="Intercession notes, scriptures, burdens…"></textarea></div>
+          <div class="pdiv"></div>
+          <div id="coverage-section" style="display:none">
+            <div class="sec">Coverage Plan</div>
+            <div class="fgrp"><textarea id="d-coverage" placeholder="Curated travel plan…"></textarea></div>
+            <div class="pdiv"></div>
+          </div>
+          <div class="fgrp">
+            <label>Custom Photo URL <span style="font-size:10px;color:var(--g500);font-weight:400">(optional)</span></label>
+            <input id="d-photo" type="url" placeholder="https://…">
+          </div>
+          <div class="pdiv"></div>
+          <button id="save-btn" onclick="saveRecord()">Save to Sheet</button>
+          <div id="save-fb"></div>
+        </div>
+
+      </div><!-- end pbody -->
+    </div><!-- end p-content -->
+  </div><!-- end panel -->
 </div>
 
 <!-- REGIONAL -->
@@ -529,6 +744,35 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);color:var(--g900);
   <div id="pr-top">
     <div class="pr-logo">🍁 BLW CAN <span>Prayer Mode</span></div>
     <button id="pr-exit" onclick="closePrayer()">✕</button>
+  </div>
+  <div id="pr-filters">
+    <div class="pr-filter-group">
+      <span class="pr-filter-lbl">Status</span>
+      <button class="pr-chip on" data-pf-status="all" onclick="setPrFilter('status','all')">All</button>
+      <button class="pr-chip" data-pf-status="Established Fellowship" onclick="setPrFilter('status','Established Fellowship')">
+        <span style="width:7px;height:7px;border-radius:50%;background:#1e8e3e;display:inline-block"></span>Established
+      </button>
+      <button class="pr-chip" data-pf-status="Pioneering Fellowship" onclick="setPrFilter('status','Pioneering Fellowship')">
+        <span style="width:7px;height:7px;border-radius:50%;background:#f9ab00;display:inline-block"></span>Pioneering
+      </button>
+      <button class="pr-chip" data-pf-status="Influenced" onclick="setPrFilter('status','Influenced')">
+        <span style="width:7px;height:7px;border-radius:50%;background:#1a73e8;display:inline-block"></span>Influenced
+      </button>
+      <button class="pr-chip" data-pf-status="Not Reached" onclick="setPrFilter('status','Not Reached')">
+        <span style="width:7px;height:7px;border-radius:50%;background:#d93025;display:inline-block"></span>Not Reached
+      </button>
+      <button class="pr-chip" data-pf-status="needs_plan" onclick="setPrFilter('status','needs_plan')">
+        <span style="width:7px;height:7px;background:#8430ce;display:inline-block;transform:rotate(45deg);border-radius:1px"></span>Needs Plan
+      </button>
+      <button class="pr-chip" data-pf-status="has_points" onclick="setPrFilter('status','has_points')">🙏 Has Points</button>
+    </div>
+    <div class="pr-filter-group">
+      <span class="pr-filter-lbl">Region</span>
+      <button class="pr-chip on" data-pf-region="all" onclick="setPrFilter('region','all')">All</button>
+      <button class="pr-chip" data-pf-region="Central" onclick="setPrFilter('region','Central')">Central</button>
+      <button class="pr-chip" data-pf-region="Central-East" onclick="setPrFilter('region','Central-East')">Central-East</button>
+      <button class="pr-chip" data-pf-region="West" onclick="setPrFilter('region','West')">West</button>
+    </div>
   </div>
   <div id="pr-map-wrap">
     <div id="pr-map"></div>
@@ -623,6 +867,7 @@ let DATA=RAW.map((r,i)=>{
 let SES=JSON.parse(localStorage.getItem('blwcan_ses')||'null')||{group:null,subgroup:null,admin:false,viewOnly:false};
 let activeFilter='all',currentId=null,hubsOn=false,fullScope=false;
 let prIdx=0,prAuto=false,prTimer=null,prMap=null,prMarkers={};
+let prFilterStatus='all',prFilterRegion='all';
 let regMap=null,spotUrl=localStorage.getItem('blwcan_spotify')||'';
 
 // ══ ONBOARDING ════════════════════════════════════════════════════════════════
@@ -854,6 +1099,21 @@ function openPanel(id){
   document.getElementById('save-fb').textContent='';
   document.getElementById('save-fb').classList.remove('show');
 
+  // New info card fields
+  document.getElementById('d-province').textContent=d.province||'—';
+  document.getElementById('d-group').textContent=d.group||'—';
+  document.getElementById('d-subgroup-val').textContent=d.subgroup||'—';
+  document.getElementById('ic-subgroup-row').style.display=d.subgroup?'flex':'none';
+
+  // Populate display tabs
+  refreshPanelDisplay(d);
+
+  // Quick add in prayer tab — show only if can edit
+  document.getElementById('prayer-quick-add').style.display=canEdit?'block':'none';
+
+  // Start on Info tab
+  switchPanelTab('info');
+
   document.getElementById('panel').classList.add('open');
 
   // Highlight marker
@@ -864,6 +1124,66 @@ function openPanel(id){
 function closePanel(){
   document.getElementById('panel').classList.remove('open');
   if(currentId!==null){MK[currentId]?.setIcon(getIcon(DATA[currentId],false));currentId=null;}
+}
+
+function switchPanelTab(tab){
+  document.querySelectorAll('.p-tab').forEach((b,i)=>{
+    const tabs=['info','notes','prayer','edit'];
+    b.classList.toggle('active',tabs[i]===tab);
+  });
+  document.querySelectorAll('.p-tab-pane').forEach(p=>{
+    p.classList.toggle('active',p.id==='ptab-'+tab);
+  });
+}
+
+function addPrayerPointEdit(){
+  if(currentId===null)return;
+  const inp=document.getElementById('pp-input-edit');
+  const val=inp.value.trim();if(!val)return;
+  DATA[currentId].prayer_points=DATA[currentId].prayer_points||[];
+  DATA[currentId].prayer_points.push(val);
+  inp.value='';
+  renderPrayerPoints(DATA[currentId].prayer_points);
+  refreshPanelDisplay(DATA[currentId]);
+}
+
+function refreshPanelDisplay(d){
+  // Update Notes tab displays
+  const notes=d.notes||'';
+  const strategy=d.strategy||'';
+  const coverage=d.coverage_plan||'';
+  document.getElementById('notes-display-card').style.display=notes?'block':'none';
+  document.getElementById('d-notes-display').textContent=notes;
+  document.getElementById('strategy-display-card').style.display=strategy?'block':'none';
+  document.getElementById('d-strategy-display').textContent=strategy;
+  document.getElementById('coverage-display-card').style.display=(coverage&&d.needs_plan)?'block':'none';
+  document.getElementById('d-coverage-display').textContent=coverage;
+  const notesEmpty=!notes&&!strategy&&!coverage;
+  document.getElementById('notes-empty').style.display=notesEmpty?'flex':'none';
+
+  // Update Prayer tab displays
+  const pts=d.prayer_points||[];
+  const pnotes=d.prayer_notes||'';
+  const hasPrayer=pts.length>0||pnotes;
+  document.getElementById('prayer-points-card').style.display=pts.length?'block':'none';
+  document.getElementById('pp-display-list').innerHTML=pts.map(p=>`<div class="pp-display-item">${p}</div>`).join('');
+  document.getElementById('prayer-notes-card').style.display=pnotes?'block':'none';
+  document.getElementById('d-pnotes-display').textContent=pnotes;
+  document.getElementById('prayer-empty').style.display=hasPrayer?'none':'flex';
+
+  // Contact display
+  const cname=d.contact_name||'';
+  const cphone=d.contact_phone||'';
+  const hasContact=cname||cphone;
+  document.getElementById('contact-card').style.display=hasContact?'block':'none';
+  if(cname) document.getElementById('d-cname-display').textContent=cname;
+  if(cphone){
+    const el=document.getElementById('d-cphone-display');
+    el.textContent=cphone;
+    el.href='tel:'+cphone.replace(/\s/g,'');
+  }
+  document.getElementById('cic-name-row').style.display=cname?'flex':'none';
+  document.getElementById('cic-phone-row').style.display=cphone?'flex':'none';
 }
 
 function onStatusChange(){
@@ -1130,14 +1450,72 @@ function buildRegStats(){
 // ══ PRAYER ════════════════════════════════════════════════════════════════════
 let prList=[];
 
+function getPrList(){
+  let list = visData().filter(d=>d.lat&&d.lng);
+  // Status filter
+  if(prFilterStatus==='has_points'){
+    list=list.filter(d=>{try{return JSON.parse(d.prayer_points||'[]').length>0;}catch{return false;}});
+  } else if(prFilterStatus==='needs_plan'){
+    list=list.filter(d=>d.needs_plan);
+  } else if(prFilterStatus!=='all'){
+    list=list.filter(d=>d.status===prFilterStatus);
+  }
+  // Region filter
+  if(prFilterRegion!=='all'){
+    list=list.filter(d=>d.group===prFilterRegion);
+  }
+  return list;
+}
+
+function setPrFilter(type, val){
+  if(type==='status') prFilterStatus=val;
+  if(type==='region') prFilterRegion=val;
+
+  // Update chip states
+  const attr = type==='status'?'data-pf-status':'data-pf-region';
+  document.querySelectorAll(`[${attr}]`).forEach(btn=>{
+    btn.classList.toggle('on', btn.getAttribute(attr)===val);
+  });
+
+  // Rebuild list, reset to start
+  prList=getPrList();
+  prIdx=0;
+
+  // Update counter
+  document.getElementById('pr-counter').textContent=prList.length?`1 / ${prList.length}`:'0 / 0';
+
+  if(prList.length){
+    showPrCard();
+    // Re-render prayer map markers to match filter
+    Object.entries(prMarkers).forEach(([id,m])=>{
+      const inList=prList.some(d=>d.id===parseInt(id));
+      m.setStyle({fillOpacity:inList?.85:.2,radius:inList?5:3});
+    });
+  } else {
+    // No results
+    document.getElementById('pr-inst').textContent='No campuses match this filter';
+    document.getElementById('pr-campus').textContent='Try a different combination';
+    document.getElementById('pr-badges').innerHTML='';
+    document.getElementById('pr-points-section').style.display='none';
+    document.getElementById('pr-pnotes-section').style.display='none';
+    document.getElementById('pr-strategy-section').style.display='none';
+    document.getElementById('pr-photo').innerHTML='<div class="photo-placeholder"><span style="color:rgba(255,255,255,.4);font-size:13px">No campuses match</span></div>';
+  }
+}
+
 function openPrayer(){
   document.getElementById('prayer').classList.add('active');
   document.getElementById('btn-prayer').classList.add('active');
-  prList=visData().filter(d=>d.lat&&d.lng);
+  // Reset filters
+  prFilterStatus='all';prFilterRegion='all';
+  document.querySelectorAll('[data-pf-status],[data-pf-region]').forEach(btn=>{
+    const isAll=btn.getAttribute('data-pf-status')==='all'||btn.getAttribute('data-pf-region')==='all';
+    btn.classList.toggle('on',isAll);
+  });
+  prList=getPrList();
   prIdx=0;
   initPrMap();
   showPrCard();
-  // Auto-load saved Spotify playlist
   autoLoadSpotify();
 }
 
@@ -1364,6 +1742,7 @@ function getGroupColor(group){
 }
 
 function prStep(dir){
+  if(!prList.length)return;
   prIdx=(prIdx+dir+prList.length)%prList.length;
   showPrCard();
 }
