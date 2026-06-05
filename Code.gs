@@ -234,21 +234,37 @@ function doGet(e) {
 }
 
 // ── GET PHOTO — fetches Wikipedia image server-side (no CORS issues) ────────
+// Apps Script can call any external URL freely — no CORS restrictions.
+// Returns the image URL for the map to display directly.
 function getPhoto(institutionName) {
   if (!institutionName) return { url: null };
   try {
-    const encoded = encodeURIComponent(institutionName);
-    const url = 'https://en.wikipedia.org/w/api.php?action=query&titles='
-      + encoded + '&prop=pageimages&format=json&pithumbsize=800&piprop=thumbnail';
-    const res  = UrlFetchApp.fetch(url, { muteHttpExceptions: true });
-    const data = JSON.parse(res.getContentText());
-    const pages = data && data.query && data.query.pages;
-    if (!pages) return { url: null };
-    const page = Object.values(pages)[0];
-    const imgUrl = page && page.thumbnail && page.thumbnail.source;
-    // Filter out logos, icons, shields
-    if (imgUrl && !imgUrl.match(/logo|icon|shield|flag|coat|emblem|badge/i)) {
-      return { url: imgUrl };
+    // Try exact name first, then with "Canada" appended for disambiguation
+    const names = [institutionName, institutionName + ' Canada'];
+    for (const name of names) {
+      const encoded = encodeURIComponent(name.replace(/\s+/g,' ').trim());
+      const apiUrl  = 'https://en.wikipedia.org/w/api.php'
+        + '?action=query&titles=' + encoded
+        + '&prop=pageimages&format=json&pithumbsize=800&piprop=thumbnail'
+        + '&redirects=1'; // follow redirects e.g. "TMU" → "Toronto Metropolitan University"
+      const res  = UrlFetchApp.fetch(apiUrl, {
+        muteHttpExceptions: true,
+        headers: { 'User-Agent': 'BLWCanMap/1.0 (campus outreach tool)' }
+      });
+      if (res.getResponseCode() !== 200) continue;
+      const data  = JSON.parse(res.getContentText());
+      const pages = data && data.query && data.query.pages;
+      if (!pages) continue;
+      const page   = Object.values(pages)[0];
+      // Skip missing pages (-1 id)
+      if (page.pageid === undefined || page.pageid === -1) continue;
+      const imgUrl = page.thumbnail && page.thumbnail.source;
+      if (!imgUrl) continue;
+      // Filter out non-photo images (logos, crests, flags, icons)
+      if (/logo|icon|shield|flag|coat|emblem|badge|crest|seal|wordmark/i.test(imgUrl)) continue;
+      // Upsize the thumbnail — replace the size in the URL
+      const bigUrl = imgUrl.replace(/\/\d+px-/, '/800px-');
+      return { url: bigUrl, page: page.title };
     }
     return { url: null };
   } catch(e) {
