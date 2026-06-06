@@ -240,37 +240,108 @@ function doGet(e) {
 function getPhoto(institutionName) {
   if (!institutionName) return { url: null };
   try {
-    // Try exact name first, then with "Canada" appended for disambiguation
-    const names = [institutionName, institutionName + ' Canada'];
-    for (const name of names) {
-      const encoded = encodeURIComponent(name.replace(/\s+/g,' ').trim());
-      const apiUrl  = 'https://en.wikipedia.org/w/api.php'
-        + '?action=query&titles=' + encoded
-        + '&prop=pageimages&format=json&pithumbsize=800&piprop=thumbnail'
-        + '&redirects=1'; // follow redirects e.g. "TMU" → "Toronto Metropolitan University"
-      const res  = UrlFetchApp.fetch(apiUrl, {
+    // Strategy: use Wikipedia's page images API with multiple props
+    // to get the best available image for each institution
+    var names = [institutionName, institutionName + ' Canada'];
+
+    for (var i = 0; i < names.length; i++) {
+      var encoded = encodeURIComponent(names[i].trim());
+
+      // Query 1: pageimages with original + thumbnail
+      var apiUrl = 'https://en.wikipedia.org/w/api.php?action=query&titles='
+        + encoded
+        + '&prop=pageimages&format=json&pithumbsize=800&piprop=original%7Cthumbnail&redirects=1';
+
+      var res  = UrlFetchApp.fetch(apiUrl, {
         muteHttpExceptions: true,
-        headers: { 'User-Agent': 'BLWCanMap/1.0 (campus outreach tool)' }
+        headers: { 'User-Agent': 'BLWCanMap/1.0' }
       });
       if (res.getResponseCode() !== 200) continue;
-      const data  = JSON.parse(res.getContentText());
-      const pages = data && data.query && data.query.pages;
+
+      var data  = JSON.parse(res.getContentText());
+      var pages = data && data.query && data.query.pages;
       if (!pages) continue;
-      const page   = Object.values(pages)[0];
-      // Skip missing pages (-1 id)
-      if (page.pageid === undefined || page.pageid === -1) continue;
-      const imgUrl = page.thumbnail && page.thumbnail.source;
-      if (!imgUrl) continue;
-      // Filter out non-photo images (logos, crests, flags, icons)
-      if (/logo|icon|shield|flag|coat|emblem|badge|crest|seal|wordmark/i.test(imgUrl)) continue;
-      // Upsize the thumbnail — replace the size in the URL
-      const bigUrl = imgUrl.replace(/\/\d+px-/, '/800px-');
-      return { url: bigUrl, page: page.title };
+
+      var page = Object.values(pages)[0];
+      if (!page || page.pageid === -1 || page.missing !== undefined) continue;
+
+      // Try original image first, then thumbnail
+      var img = (page.original && page.original.source)
+             || (page.thumbnail && page.thumbnail.source);
+
+      if (img && !/\.svg/i.test(img) &&
+          !/logo|icon|shield|flag|coat|emblem|badge|crest|seal|wordmark/i.test(img)) {
+        var bigUrl = img.replace(/\/\d+px-/, '/800px-');
+        return { url: bigUrl, title: page.title };
+      }
+
+      // Query 2: get images listed ON the page, pick first photo
+      var imgListUrl = 'https://en.wikipedia.org/w/api.php?action=query&titles='
+        + encoded
+        + '&prop=images&format=json&imlimit=20&redirects=1';
+
+      var res2  = UrlFetchApp.fetch(imgListUrl, {
+        muteHttpExceptions: true,
+        headers: { 'User-Agent': 'BLWCanMap/1.0' }
+      });
+      if (res2.getResponseCode() !== 200) continue;
+
+      var data2  = JSON.parse(res2.getContentText());
+      var pages2 = data2 && data2.query && data2.query.pages;
+      if (!pages2) continue;
+
+      var page2  = Object.values(pages2)[0];
+      var images = page2 && page2.images;
+      if (!images || !images.length) continue;
+
+      // Find first .jpg or .png that isn't a logo/icon/flag
+      for (var j = 0; j < images.length; j++) {
+        var title = images[j].title || '';
+        if (!/\.(jpg|jpeg|png)/i.test(title)) continue;
+        if (/logo|icon|shield|flag|coat|emblem|badge|crest|seal|wordmark|commons-logo/i.test(title)) continue;
+
+        // Fetch the actual image URL via imageinfo
+        var imgTitle  = encodeURIComponent(title);
+        var infoUrl   = 'https://en.wikipedia.org/w/api.php?action=query&titles='
+          + imgTitle + '&prop=imageinfo&iiprop=url&iiurlwidth=800&format=json';
+        var res3 = UrlFetchApp.fetch(infoUrl, {
+          muteHttpExceptions: true,
+          headers: { 'User-Agent': 'BLWCanMap/1.0' }
+        });
+        if (res3.getResponseCode() !== 200) continue;
+        var data3  = JSON.parse(res3.getContentText());
+        var pages3 = data3 && data3.query && data3.query.pages;
+        if (!pages3) continue;
+        var p3   = Object.values(pages3)[0];
+        var info = p3 && p3.imageinfo && p3.imageinfo[0];
+        var src  = info && (info.thumburl || info.url);
+        if (!src) continue;
+        if (/logo|icon|shield|flag|coat|emblem|badge|crest|seal|wordmark/i.test(src)) continue;
+        return { url: src, title: page2.title };
+      }
     }
+
     return { url: null };
   } catch(e) {
+    Logger.log('getPhoto error: ' + e.message);
     return { url: null, error: e.message };
   }
+}
+
+// Test from editor
+function testGetPhoto() {
+  ['Brock University','University of Toronto','McMaster University',
+   'University of Waterloo','York University'].forEach(function(name){
+    var r = getPhoto(name);
+    Logger.log(name + ' → ' + (r.url ? r.url.substring(0,80) : 'null'));
+  });
+}
+
+
+// Run this ONCE from the Apps Script editor, then redeploy as new version
+function authorizeScript() {
+  var r = UrlFetchApp.fetch('https://www.google.com', { muteHttpExceptions: true });
+  Logger.log('Auth OK — status: ' + r.getResponseCode() + ' — now redeploy as new version');
 }
 
 // ── GET HUBS — reads Hubs sheet (A: Name, B: Lat, C: Lng, D: Region) ────────
@@ -685,4 +756,80 @@ function testUpsert() {
     coverage_plan: '',
   });
   Logger.log(JSON.stringify(result));
+}
+
+// ── BULK PHOTO AUDIT ─────────────────────────────────────────────────────────
+// Run this from the editor to see which campuses have photos and which don't
+// Results written to a new sheet: BLW_CAN_PhotoAudit
+function auditPhotos() {
+  var ss      = SpreadsheetApp.getActiveSpreadsheet();
+  var campuses = getAllCampuses();
+
+  // Create or clear audit sheet
+  var auditSheet = ss.getSheetByName('BLW_CAN_PhotoAudit');
+  if (!auditSheet) auditSheet = ss.insertSheet('BLW_CAN_PhotoAudit');
+  else auditSheet.clearContents();
+
+  // Headers
+  var headers = ['Institution','Campus','Group','Has Photo','Photo URL','Notes'];
+  auditSheet.getRange(1,1,1,headers.length).setValues([headers]);
+  var hRow = auditSheet.getRange(1,1,1,headers.length);
+  hRow.setBackground('#0d1117').setFontColor('#fff').setFontWeight('bold');
+  auditSheet.setFrozenRows(1);
+
+  var results = [];
+  var found = 0, missing = 0;
+
+  for (var i = 0; i < campuses.length; i++) {
+    var c = campuses[i];
+    // Skip duplicates — only check unique institution names
+    if (i > 0 && campuses[i-1].institution === c.institution) continue;
+
+    Logger.log('Checking ' + (i+1) + '/' + campuses.length + ': ' + c.institution);
+
+    var result = getPhoto(c.institution);
+    var hasPhoto = !!(result && result.url);
+    if (hasPhoto) found++; else missing++;
+
+    results.push([
+      c.institution,
+      c.campus || '',
+      c.group  || '',
+      hasPhoto ? 'YES' : 'NO',
+      result.url || '',
+      result.error || (hasPhoto ? 'OK' : 'No image found')
+    ]);
+
+    // Write in batches of 20 to avoid timeout
+    if (results.length >= 20) {
+      var startRow = auditSheet.getLastRow() + 1;
+      auditSheet.getRange(startRow, 1, results.length, headers.length).setValues(results);
+      results = [];
+      Utilities.sleep(500); // be nice to Wikipedia API
+    }
+  }
+
+  // Write remaining
+  if (results.length > 0) {
+    var startRow = auditSheet.getLastRow() + 1;
+    auditSheet.getRange(startRow, 1, results.length, headers.length).setValues(results);
+  }
+
+  // Color code YES/NO column
+  var lastRow = auditSheet.getLastRow();
+  var rules = auditSheet.getConditionalFormatRules();
+  var yesRange = auditSheet.getRange('D2:D' + lastRow);
+  rules.push(SpreadsheetApp.newConditionalFormatRule()
+    .whenTextEqualTo('YES').setBackground('#e6f4ea').setFontColor('#1e8e3e').setBold(true)
+    .setRanges([yesRange]).build());
+  rules.push(SpreadsheetApp.newConditionalFormatRule()
+    .whenTextEqualTo('NO').setBackground('#fce8e6').setFontColor('#d93025')
+    .setRanges([yesRange]).build());
+  auditSheet.setConditionalFormatRules(rules);
+
+  // Auto-resize columns
+  auditSheet.autoResizeColumns(1, headers.length);
+
+  Logger.log('AUDIT COMPLETE — Found: ' + found + ', Missing: ' + missing);
+  SpreadsheetApp.getUi().alert('Photo audit complete!\n\nFound: ' + found + '\nMissing: ' + missing + '\n\nSee BLW_CAN_PhotoAudit sheet.');
 }
