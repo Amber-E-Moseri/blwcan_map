@@ -1695,21 +1695,7 @@ function loadCampusPhoto(d){
   const col  = getGroupColor(d.group);
 
   const showPlaceholder = () => {
-    wrap.innerHTML = `<div style="
-      background:linear-gradient(135deg,${col}44,${col}99);
-      display:flex;flex-direction:column;align-items:center;
-      justify-content:center;gap:8px;height:100%;width:100%;padding:20px;box-sizing:border-box">
-      <svg width="38" height="38" viewBox="0 0 24 24" fill="none"
-        stroke="white" stroke-width="1.1" opacity="0.6">
-        <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
-        <polyline points="9 22 9 12 15 12 15 22"/>
-      </svg>
-      <span style="color:rgba(255,255,255,.9);font-size:13px;font-weight:600;
-        text-align:center;line-height:1.4;max-width:90%">${d.institution}</span>
-      <span style="color:rgba(255,255,255,.55);font-size:11px">
-        ${[d.campus,d.province].filter(Boolean).join(' · ')}
-      </span>
-    </div>`;
+    wrap.innerHTML = '<div style="background:linear-gradient(135deg,'+col+'44,'+col+'99);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;height:100%;width:100%;padding:20px;box-sizing:border-box"><svg width=\'38\' height=\'38\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'white\' stroke-width=\'1.1\' opacity=\'0.5\'><path d=\'M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z\'/><polyline points=\'9 22 9 12 15 12 15 22\'/></svg><span style=\'color:rgba(255,255,255,.9);font-size:13px;font-weight:600;text-align:center;line-height:1.4;max-width:90%\'>' + d.institution + '</span><span style=\'color:rgba(255,255,255,.5);font-size:11px\'>' + [d.campus,d.province].filter(Boolean).join(' · ') + '</span></div>';
   };
 
   const showImg = (src) => {
@@ -1726,58 +1712,52 @@ function loadCampusPhoto(d){
 
   showPlaceholder();
 
-  // Layer 1: Custom URL — always wins
+  // Layer 1: Custom URL pasted by team
   if (d.custom_photo && d.custom_photo.trim()) {
     showImg(d.custom_photo.trim());
     return;
   }
 
-  // Layer 2: localStorage cache
+  // Layer 2: localStorage cache — avoid repeat fetches
   const cacheKey = 'photo_' + d.institution;
   const cached = localStorage.getItem(cacheKey);
   if (cached === 'none') return;
   if (cached) { showImg(cached); return; }
 
-  // Layer 3: Wikipedia REST API — works from https:// hosted pages (not file://)
-  // Build slug: spaces→underscore, strip parens, handle accents
+  // Layer 3: Wikipedia REST v1 — works from https:// hosted pages
+  // Build clean slug for Wikipedia URL
   const slug = d.institution
-    .replace(/\s+/g,'_')
-    .replace(/[()]/g,'')
+    .split(' ').join('_')
+    .replace(/[()']/g,'')
     .replace(/é/g,'e').replace(/è/g,'e').replace(/ê/g,'e')
     .replace(/à/g,'a').replace(/â/g,'a')
     .replace(/ô/g,'o').replace(/û/g,'u').replace(/î/g,'i')
     .replace(/ç/g,'c').replace(/É/g,'E').replace(/È/g,'E')
-    .trim();
+    .replace(/À/g,'A').replace(/Ô/g,'O');
 
-  fetch('https://en.wikipedia.org/api/rest_v1/page/summary/' + slug, {
-    headers:{'Accept':'application/json'},
+  fetch('https://en.wikipedia.org/api/rest_v1/page/summary/' + encodeURIComponent(slug), {
+    headers: { 'Accept': 'application/json' },
     signal: AbortSignal.timeout(7000)
   })
-  .then(r => {
-    if (!r.ok) throw new Error(r.status);
-    return r.json();
-  })
-  .then(data => {
-    const src = (data.thumbnail && data.thumbnail.source) ||
-                (data.originalimage && data.originalimage.source);
+  .then(function(r){ if (!r.ok) throw new Error(r.status); return r.json(); })
+  .then(function(data){
+    var src = (data.thumbnail && data.thumbnail.source) ||
+              (data.originalimage && data.originalimage.source);
     if (!src) throw new Error('no image');
-    // Skip logos, icons, crests
-    if (/logo|icon|shield|flag|coat|emblem|badge|crest|seal|wordmark/i.test(src)){
-      throw new Error('logo');
-    }
-    // Upsize: replace thumbnail size with 640px
-    const big = src.replace(/\/\d+px-/, '/640px-');
+    if (/logo|icon|shield|flag|coat|emblem|badge|crest|seal|wordmark/i.test(src)) throw new Error('logo');
+    // Upsize thumbnail
+    var big = src.replace(/[/]\d+px-/, '/640px-');
     localStorage.setItem(cacheKey, big);
     showImg(big);
   })
-  .catch(() => {
-    // Layer 4: Apps Script proxy (fallback if Wikipedia fails or not redeployed)
+  .catch(function(){
+    // Layer 4: Apps Script proxy fallback
     if (!CFG.SCRIPT_URL.includes('YOUR_SCRIPT_ID')) {
       fetch(CFG.SCRIPT_URL + '?action=getPhoto&name=' + encodeURIComponent(d.institution), {
         signal: AbortSignal.timeout(8000)
       })
-      .then(r => r.ok ? r.json() : Promise.reject())
-      .then(data => {
+      .then(function(r){ return r.ok ? r.json() : Promise.reject(); })
+      .then(function(data){
         if (data && data.url) {
           localStorage.setItem(cacheKey, data.url);
           showImg(data.url);
@@ -1785,9 +1765,7 @@ function loadCampusPhoto(d){
           localStorage.setItem(cacheKey, 'none');
         }
       })
-      .catch(() => {
-        localStorage.setItem(cacheKey, 'none');
-      });
+      .catch(function(){ localStorage.setItem(cacheKey, 'none'); });
     }
   });
 }
@@ -1871,4 +1849,3 @@ if(SES&&(SES.admin||(SES.group))){
 </script>
 </body>
 </html>
-        
