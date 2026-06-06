@@ -226,7 +226,7 @@ function doGet(e) {
     if (action === 'getAll')    return respond(getAllCampuses());
     if (action === 'getGroups') return respond(getGroups());
     if (action === 'getHubs')   return respond(getHubs());
-    if (action === 'getPhoto')  return respond(getPhoto(e.parameter.name || ''));
+    if (action === 'getPhoto')  return respond(getPhoto(e.parameter.name || '', e.parameter.campus || ''));
     if (action === 'ping')      return respond({ ok: true, ts: new Date().toISOString() });
     return respond({ error: 'Unknown GET action: ' + action });
   } catch(err) {
@@ -237,95 +237,136 @@ function doGet(e) {
 // ── GET PHOTO — fetches Wikipedia image server-side (no CORS issues) ────────
 // Apps Script can call any external URL freely — no CORS restrictions.
 // Returns the image URL for the map to display directly.
-function getPhoto(institutionName) {
+function getPhoto(institutionName, campusName) {
   if (!institutionName) return { url: null };
   try {
-    // Strategy: use Wikipedia's page images API with multiple props
-    // to get the best available image for each institution
-    var names = [institutionName, institutionName + ' Canada'];
+    var searchTerms = [];
+    if (campusName && campusName.trim()) {
+      searchTerms.push(institutionName + ' ' + campusName);
+      var shortCampus = campusName.replace(/Campus/gi,'').trim();
+      if (shortCampus) searchTerms.push(institutionName + ' ' + shortCampus);
+    }
+    searchTerms.push(institutionName);
 
-    for (var i = 0; i < names.length; i++) {
-      var encoded = encodeURIComponent(names[i].trim());
+    for (var i = 0; i < searchTerms.length; i++) {
+      var term    = searchTerms[i].trim();
+      var encoded = encodeURIComponent(term);
+      Logger.log('Trying: ' + term);
 
-      // Query 1: pageimages with original + thumbnail
-      var apiUrl = 'https://en.wikipedia.org/w/api.php?action=query&titles='
-        + encoded
-        + '&prop=pageimages&format=json&pithumbsize=800&piprop=original%7Cthumbnail&redirects=1';
+      // Step 1: pageimages
+      var url1 = 'https://en.wikipedia.org/w/api.php?action=query&titles='
+        + encoded + '&prop=pageimages&format=json&pithumbsize=800&piprop=original%7Cthumbnail&redirects=1';
+      Utilities.sleep(300); // be nice to Wikipedia
+      var r1   = UrlFetchApp.fetch(url1, { muteHttpExceptions:true, headers:{'User-Agent':'BLWCanMap/1.0 (blwcan@outreach.ca)'} });
+      var code1 = r1.getResponseCode();
+      if (code1 === 429) { Logger.log('  rate limited, waiting 3s'); Utilities.sleep(3000); r1 = UrlFetchApp.fetch(url1, { muteHttpExceptions:true, headers:{'User-Agent':'BLWCanMap/1.0 (blwcan@outreach.ca)'} }); code1 = r1.getResponseCode(); }
+      Logger.log('  pageimages HTTP: ' + code1);
 
-      var res  = UrlFetchApp.fetch(apiUrl, {
-        muteHttpExceptions: true,
-        headers: { 'User-Agent': 'BLWCanMap/1.0' }
-      });
-      if (res.getResponseCode() !== 200) continue;
-
-      var data  = JSON.parse(res.getContentText());
-      var pages = data && data.query && data.query.pages;
-      if (!pages) continue;
-
-      var page = Object.values(pages)[0];
-      if (!page || page.pageid === -1 || page.missing !== undefined) continue;
-
-      // Try original image first, then thumbnail
-      var img = (page.original && page.original.source)
-             || (page.thumbnail && page.thumbnail.source);
-
-      if (img && !/\.svg/i.test(img) &&
-          !/logo|icon|shield|flag|coat|emblem|badge|crest|seal|wordmark/i.test(img)) {
-        var bigUrl = img.replace(/\/\d+px-/, '/800px-');
-        return { url: bigUrl, title: page.title };
+      if (r1.getResponseCode() === 200) {
+        var d1    = JSON.parse(r1.getContentText());
+        var pp    = d1 && d1.query && d1.query.pages;
+        var page  = pp ? Object.values(pp)[0] : null;
+        Logger.log('  page: ' + (page ? 'id='+page.pageid+' missing='+(page.missing||'no') : 'null'));
+        if (page && page.pageid > 0 && page.missing === undefined) {
+          var img = (page.original && page.original.source) || (page.thumbnail && page.thumbnail.source);
+          Logger.log('  img: ' + (img || 'none'));
+          if (img && isGoodImage(img)) {
+            var big = img.replace(/\/\d+px-/, '/800px-');
+            Logger.log('  FOUND: ' + big.substring(0,80));
+            return { url: big, title: page.title };
+          }
+        }
       }
 
-      // Query 2: get images listed ON the page, pick first photo
-      var imgListUrl = 'https://en.wikipedia.org/w/api.php?action=query&titles='
-        + encoded
-        + '&prop=images&format=json&imlimit=20&redirects=1';
+      // Step 2: image list
+      var url2 = 'https://en.wikipedia.org/w/api.php?action=query&titles='
+        + encoded + '&prop=images&format=json&imlimit=30&redirects=1';
+      Utilities.sleep(300);
+      var r2   = UrlFetchApp.fetch(url2, { muteHttpExceptions:true, headers:{'User-Agent':'BLWCanMap/1.0 (blwcan@outreach.ca)'} });
+      var code2 = r2.getResponseCode();
+      if (code2 === 429) { Utilities.sleep(3000); r2 = UrlFetchApp.fetch(url2, { muteHttpExceptions:true, headers:{'User-Agent':'BLWCanMap/1.0 (blwcan@outreach.ca)'} }); code2 = r2.getResponseCode(); }
+      if (code2 !== 200) { Logger.log('  list HTTP fail: '+code2); continue; }
 
-      var res2  = UrlFetchApp.fetch(imgListUrl, {
-        muteHttpExceptions: true,
-        headers: { 'User-Agent': 'BLWCanMap/1.0' }
-      });
-      if (res2.getResponseCode() !== 200) continue;
+      var d2    = JSON.parse(r2.getContentText());
+      var pp2   = d2 && d2.query && d2.query.pages;
+      var page2 = pp2 ? Object.values(pp2)[0] : null;
+      var imgs  = page2 && page2.images;
+      Logger.log('  images found: ' + (imgs ? imgs.length : 0));
+      if (!imgs || !imgs.length) continue;
 
-      var data2  = JSON.parse(res2.getContentText());
-      var pages2 = data2 && data2.query && data2.query.pages;
-      if (!pages2) continue;
+      var keywords = (institutionName+' '+(campusName||'')).toLowerCase().split(' ').filter(function(w){return w.length>3;});
+      var scored = [];
+      for (var j = 0; j < imgs.length; j++) {
+        var t = (imgs[j].title||'').toLowerCase();
+        if (!/\.(jpg|jpeg|png)/i.test(t)) continue;
+        if (!isGoodImageTitle(t)) continue;
+        var sc = 0;
+        keywords.forEach(function(kw){if(t.indexOf(kw)>-1)sc+=10;});
+        if (/campus|building|hall|aerial|exterior|entrance/i.test(t)) sc+=5;
+        if (/portrait|person|player|coach|athlete/i.test(t)) sc-=20;
+        scored.push({title:imgs[j].title, score:sc});
+      }
+      scored.sort(function(a,b){return b.score-a.score;});
+      Logger.log('  top candidates: ' + scored.slice(0,3).map(function(x){return x.title+'('+x.score+')'}).join(', '));
 
-      var page2  = Object.values(pages2)[0];
-      var images = page2 && page2.images;
-      if (!images || !images.length) continue;
-
-      // Find first .jpg or .png that isn't a logo/icon/flag
-      for (var j = 0; j < images.length; j++) {
-        var title = images[j].title || '';
-        if (!/\.(jpg|jpeg|png)/i.test(title)) continue;
-        if (/logo|icon|shield|flag|coat|emblem|badge|crest|seal|wordmark|commons-logo/i.test(title)) continue;
-
-        // Fetch the actual image URL via imageinfo
-        var imgTitle  = encodeURIComponent(title);
-        var infoUrl   = 'https://en.wikipedia.org/w/api.php?action=query&titles='
-          + imgTitle + '&prop=imageinfo&iiprop=url&iiurlwidth=800&format=json';
-        var res3 = UrlFetchApp.fetch(infoUrl, {
-          muteHttpExceptions: true,
-          headers: { 'User-Agent': 'BLWCanMap/1.0' }
-        });
-        if (res3.getResponseCode() !== 200) continue;
-        var data3  = JSON.parse(res3.getContentText());
-        var pages3 = data3 && data3.query && data3.query.pages;
-        if (!pages3) continue;
-        var p3   = Object.values(pages3)[0];
+      for (var k = 0; k < Math.min(5, scored.length); k++) {
+        var it   = encodeURIComponent(scored[k].title);
+        var iu   = 'https://en.wikipedia.org/w/api.php?action=query&titles='+it+'&prop=imageinfo&iiprop=url&iiurlwidth=800&format=json';
+        var r3   = UrlFetchApp.fetch(iu, { muteHttpExceptions:true, headers:{'User-Agent':'BLWCanMap/1.0'} });
+        if (r3.getResponseCode() !== 200) continue;
+        var d3   = JSON.parse(r3.getContentText());
+        var pp3  = d3 && d3.query && d3.query.pages;
+        var p3   = pp3 ? Object.values(pp3)[0] : null;
         var info = p3 && p3.imageinfo && p3.imageinfo[0];
         var src  = info && (info.thumburl || info.url);
-        if (!src) continue;
-        if (/logo|icon|shield|flag|coat|emblem|badge|crest|seal|wordmark/i.test(src)) continue;
-        return { url: src, title: page2.title };
+        Logger.log('  candidate '+k+': ' + (src||'no url'));
+        if (src && isGoodImage(src)) {
+          Logger.log('  FOUND via list: ' + src.substring(0,80));
+          return { url: src, title: page2.title };
+        }
       }
     }
-
+    Logger.log('No image found for: ' + institutionName);
     return { url: null };
   } catch(e) {
-    Logger.log('getPhoto error: ' + e.message);
+    Logger.log('ERROR: ' + e.message);
     return { url: null, error: e.message };
   }
+}
+
+function testGetPhoto() {
+  ['Brock University','University of Toronto','McMaster University'].forEach(function(name){
+    Logger.log('=== ' + name + ' ===');
+    var r = getPhoto(name, '');
+    Logger.log('RESULT: ' + (r.url||'null'));
+  });
+}
+
+function isGoodImage(url) {
+  if (!url) return false;
+  if (/\.svg$/i.test(url)) return false;
+  // Only filter actual logo/crest filenames — NOT the domain
+  if (/[/_](logo|shield|flag|coat|emblem|badge|crest|seal|wordmark|arms)[_/.]/i.test(url)) return false;
+  if (/commons-logo|question_book|edit-clear/i.test(url)) return false;
+  return true;
+}
+
+function isGoodImageTitle(title) {
+  if (/\.svg$/i.test(title)) return false;
+  if (/logo|icon|shield|flag|coat|emblem|badge|crest|seal|wordmark|arms/i.test(title)) return false;
+  if (/commons-logo|question_book|edit-clear|wikimedia/i.test(title)) return false;
+  if (/portrait|headshot|profile|signature/i.test(title)) return false;
+  return true;
+}
+
+// Test from editor
+function testGetPhoto() {
+  ['Brock University','University of Toronto','McMaster University',
+   'University of Waterloo','York University','University of Calgary',
+   'Simon Fraser University','Dalhousie University'].forEach(function(name){
+    var r = getPhoto(name);
+    Logger.log(name + ' → ' + (r.url ? r.url.substring(0,90) : 'null') + (r.error?' ERR:'+r.error:''));
+  });
 }
 
 // Test from editor
