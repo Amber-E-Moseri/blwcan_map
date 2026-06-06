@@ -327,8 +327,9 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);color:var(--g900);
 .pr-prog-fill{height:100%;background:var(--blue);border-radius:2px;transition:width .4s}
 
 /* Photo banner */
-#pr-photo{width:min(520px,100%);height:140px;border-radius:14px 14px 0 0;overflow:hidden;position:relative;background:linear-gradient(135deg,#1a2332,#0d2040);display:flex;align-items:center;justify-content:center;flex-shrink:0}
-#pr-photo img{width:100%;height:100%;object-fit:cover;transition:opacity .3s}
+#pr-photo{width:min(520px,100%);height:220px;border-radius:14px 14px 0 0;overflow:hidden;position:relative;background:linear-gradient(135deg,#1a2332,#0d2040);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+#pr-photo img{width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .5s ease-in-out}
+#pr-photo img.loaded{opacity:1}
 #pr-photo .photo-overlay{position:absolute;inset:0;background:linear-gradient(to bottom,transparent 40%,rgba(13,17,23,.8))}
 #pr-photo .photo-placeholder{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;color:rgba(255,255,255,.25);font-size:12px;height:100%;width:100%}
 
@@ -437,7 +438,7 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);color:var(--g900);
   .pr-filter-lbl{min-width:38px;font-size:9px}
   .pr-chip{font-size:10px;padding:3px 9px}
   #pr-bottom{padding:0 8px 14px;gap:8px}
-  #pr-photo{height:120px;border-radius:10px 10px 0 0}
+  #pr-photo{height:160px;border-radius:10px 10px 0 0}
   #pr-card{padding:12px 14px 10px}
   .pr-inst{font-size:15px}
   #pr-controls{gap:6px;padding:6px 10px;flex-wrap:wrap;justify-content:center}
@@ -1719,6 +1720,10 @@ function loadCampusPhoto(d){
       wrap.innerHTML = '';
       wrap.appendChild(img);
       wrap.insertAdjacentHTML('beforeend','<div class="photo-overlay"></div>');
+      // Fade in smoothly
+      requestAnimationFrame(function(){
+        requestAnimationFrame(function(){ img.classList.add('loaded'); });
+      });
     };
     img.onerror = showPlaceholder;
     img.src = src;
