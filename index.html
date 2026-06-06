@@ -897,8 +897,9 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);color:var(--g900);
         </button>
         <div style="width:1px;height:18px;background:rgba(255,255,255,.1)"></div>
         <button class="pr-btn primary" id="pr-auto-btn" onclick="toggleAuto()">▶ Auto</button>
-        <input id="pr-interval" type="number" min="5" max="600" value="30" title="Seconds per campus">
-        <span style="font-size:10px;color:rgba(255,255,255,.3)">sec</span>
+        <input id="pr-interval" type="number" min="5" max="600" value="10" title="Seconds per campus" style="width:42px">
+        <span style="font-size:10px;color:rgba(255,255,255,.35)">sec</span>
+        <span id="pr-countdown" style="font-size:10px;color:rgba(255,255,255,.5);min-width:36px;display:none"></span>
       </div>
     </div>
   </div>
@@ -1779,20 +1780,59 @@ function prStep(dir){
   if(!prList.length)return;
   prIdx=(prIdx+dir+prList.length)%prList.length;
   showPrCard();
+  // Reset countdown when step happens
+  if(prAuto){
+    const secs=parseInt(document.getElementById('pr-interval').value)||10;
+    startCountdown(secs);
+  }
 }
+
+let prCountdownTimer=null;
+let prCountdownVal=0;
 
 function toggleAuto(){
   prAuto=!prAuto;
   const btn=document.getElementById('pr-auto-btn');
   if(prAuto){
-    btn.textContent='⏸ Pause';btn.classList.add('paused');btn.classList.remove('primary');
-    const secs=parseInt(document.getElementById('pr-interval').value)||30;
-    prTimer=setInterval(()=>prStep(1),secs*1000);
+    btn.textContent='⏸ Pause';
+    btn.classList.add('paused');
+    btn.classList.remove('primary');
+    const secs=parseInt(document.getElementById('pr-interval').value)||10;
+    // Start interval
+    prTimer=setInterval(()=>prStep(1), secs*1000);
+    // Start countdown display
+    startCountdown(secs);
   }else{
-    stopAuto();btn.textContent='▶ Auto';btn.classList.add('primary');btn.classList.remove('paused');
+    stopAuto();
+    btn.textContent='▶ Auto';
+    btn.classList.add('primary');
+    btn.classList.remove('paused');
   }
 }
-function stopAuto(){prAuto=false;clearInterval(prTimer);prTimer=null;}
+
+function startCountdown(secs){
+  const el=document.getElementById('pr-countdown');
+  if(!el)return;
+  el.style.display='inline';
+  prCountdownVal=secs;
+  el.textContent='next in '+prCountdownVal+'s';
+  clearInterval(prCountdownTimer);
+  prCountdownTimer=setInterval(()=>{
+    prCountdownVal--;
+    if(prCountdownVal<=0){
+      prCountdownVal=parseInt(document.getElementById('pr-interval').value)||10;
+    }
+    el.textContent='next in '+prCountdownVal+'s';
+  },1000);
+}
+
+function stopAuto(){
+  prAuto=false;
+  clearInterval(prTimer);prTimer=null;
+  clearInterval(prCountdownTimer);prCountdownTimer=null;
+  const el=document.getElementById('pr-countdown');
+  if(el)el.style.display='none';
+}
 
 // Spotify
 function toggleSpInput(){const r=document.getElementById('sp-input-row');r.style.display=r.style.display==='none'||!r.style.display?'flex':'none';}
