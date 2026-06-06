@@ -982,12 +982,9 @@ function finishOnboard(){
 
 // ══ MAP ════════════════════════════════════════════════════════════════════════
 const map=L.map('map',{
-  center:[60,-96],zoom:4,
+  center:[58,-96],zoom:4,
   zoomControl:false,preferCanvas:true,
   minZoom:3,
-  // Soft bounds — Canada + small buffer, user can still pan but snaps back
-  maxBounds:[[41,-142],[84,-52]],
-  maxBoundsViscosity:0.7
 });
 L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',{attribution:'&copy; OSM &copy; CARTO',subdomains:'abcd',maxZoom:19}).addTo(map);
 L.control.zoom({position:'bottomright'}).addTo(map);
@@ -1020,7 +1017,7 @@ function buildHubLayers(){
     const label=L.marker([h.lat,h.lng],{
       icon:L.divIcon({
         className:'hub-label',
-        html:`<div style="color:${col};padding:2px 7px;background:rgba(255,255,255,.88);border-radius:4px;font-size:10px;font-weight:700;white-space:nowrap;border:1px solid ${col}40;font-family:var(--font)">${name}</div>`,
+        html:`<div style="color:${col};padding:1px 6px;background:rgba(255,255,255,.92);border-radius:3px;font-size:9px;font-weight:600;white-space:nowrap;border:1px solid ${col}30;font-family:var(--font);box-shadow:0 1px 3px rgba(0,0,0,.12)">${name}</div>`,
         iconAnchor:[0,0]
       }),
       interactive:false,zIndexOffset:-100
@@ -1040,9 +1037,10 @@ function updateHubVis(){
     const h=HUBS[name];
     const inGroup=!gf||h.group===gf;
 
-    const showCircle = inGroup && (hubsOn || z>=8);
-    const showOuter  = inGroup && hubsOn; // outer ring only when explicitly toggled on
-    const showLabel  = inGroup && (hubsOn || z<=7);
+    const showCircle = inGroup && (hubsOn && z>=6);
+    const showOuter  = inGroup && hubsOn && z>=6;
+    // Labels only when zoomed in enough to be readable, or toggle forced on at z>=8
+    const showLabel  = inGroup && ((hubsOn && z>=8) || z>=9);
 
     toggleLayer(circle,      showCircle);
     toggleLayer(label,       showLabel);
@@ -1050,17 +1048,34 @@ function updateHubVis(){
   });
 }
 function toggleLayer(l,show){show?(map.hasLayer(l)||l.addTo(map)):(map.hasLayer(l)&&map.removeLayer(l));}
-map.on('zoomend',updateHubVis);
+map.on('zoomend',()=>{
+  updateHubVis();
+  // Scale campus dots with zoom — smaller at country view, larger when zoomed in
+  const z = map.getZoom();
+  const sz = z<=4?8:z<=6?10:z<=8?12:14;
+  const bw = z<=4?1:2;
+  Object.entries(MK).forEach(([id,m])=>{
+    if(parseInt(id)===currentId) return; // keep selected marker large
+    const d=DATA[id];
+    if(d.needs_plan){
+      m.setIcon(mkDiamond(false,sz));
+    } else {
+      m.setIcon(mkCircle(d.status,false,sz,bw));
+    }
+  });
+});
 
 // Markers
 const MK={};
-function mkCircle(status,sel){
-  const c=ST[status]?.color||'#9aa0a6',sz=sel?18:12,bw=sel?3:2;
-  return L.divIcon({className:'',html:`<div style="width:${sz}px;height:${sz}px;border-radius:50%;background:${c};border:${bw}px solid white;box-shadow:0 1px ${sel?8:4}px rgba(0,0,0,.25)"></div>`,iconSize:[sz,sz],iconAnchor:[sz/2,sz/2]});
+function mkCircle(status,sel,sz,bw){
+  const c=ST[status]?.color||'#9aa0a6';
+  sz=sz||(sel?18:12); bw=bw||(sel?3:2);
+  return L.divIcon({className:'',html:`<div style="width:${sz}px;height:${sz}px;border-radius:50%;background:${c};border:${bw}px solid white;box-shadow:0 1px ${sel?8:4}px rgba(0,0,0,.25);transition:all .2s"></div>`,iconSize:[sz,sz],iconAnchor:[sz/2,sz/2]});
 }
-function mkDiamond(sel){
-  const sz=sel?18:12;
-  return L.divIcon({className:'',html:`<div style="width:${sz}px;height:${sz}px;background:#8430ce;border:${sel?3:2}px solid white;box-shadow:0 1px ${sel?8:4}px rgba(0,0,0,.25);transform:rotate(45deg);border-radius:2px"></div>`,iconSize:[sz,sz],iconAnchor:[sz/2,sz/2]});
+function mkDiamond(sel,sz){
+  sz=sz||(sel?18:12);
+  const bw=sel?3:2;
+  return L.divIcon({className:'',html:`<div style="width:${sz}px;height:${sz}px;background:#8430ce;border:${bw}px solid white;box-shadow:0 1px ${sel?8:4}px rgba(0,0,0,.25);transform:rotate(45deg);border-radius:2px;transition:all .2s"></div>`,iconSize:[sz,sz],iconAnchor:[sz/2,sz/2]});
 }
 function getIcon(d,sel=false){return d.needs_plan?mkDiamond(sel):mkCircle(d.status,sel);}
 
@@ -1856,3 +1871,4 @@ if(SES&&(SES.admin||(SES.group))){
 </script>
 </body>
 </html>
+        
